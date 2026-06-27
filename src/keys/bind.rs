@@ -10,6 +10,9 @@ use super::event::KeyEvent;
 pub const DEFAULT_OVERLAY_TOGGLE: LazyCell<Vec<String>> =
   LazyCell::new(|| vec!["ControlLeft".into(), "BackQuote".into()]);
 
+pub const DEFAULT_QUIT: LazyCell<Vec<String>> =
+  LazyCell::new(|| vec!["ControlLeft".into(), "KeyQ".into()]);
+
 pub struct Keybind {
   pub keys: Vec<Key>,
   pub event: KeyEvent,
@@ -71,5 +74,9 @@ pub fn default_keybinds() -> Vec<Keybind> {
       KeyEvent::ToggleOverlay,
     ),
     Keybind::new(vec![Key::KeyC], KeyEvent::OpenConfigurator),
+    Keybind::new(
+      strings_to_keys(DEFAULT_QUIT.clone()),
+      KeyEvent::Quit,
+    ),
   ]
 }

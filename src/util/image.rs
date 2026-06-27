@@ -117,11 +117,12 @@ pub fn circular_with_border(
 
   let mut border_paint = Paint::default();
   let border = border.unwrap_or_else(|| SkColor::from_argb(0, 0, 0, 0));
+  
 
   border_paint.set_color(border);
   border_paint.set_anti_alias(true);
   border_paint.set_style(PaintStyle::Stroke);
-  border_paint.set_stroke_width(32.);
+  border_paint.set_stroke_width(50.);
 
   canvas.draw_path(&clip_path, &border_paint);
 

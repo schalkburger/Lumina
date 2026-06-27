@@ -289,6 +289,9 @@ fn app() -> impl IntoElement {
             app_state.write().is_open = false;
           }
           keys::KeyEvent::OpenConfigurator => {}
+          keys::KeyEvent::Quit => {
+            std::process::exit(0);
+          }
         }
       }
     });

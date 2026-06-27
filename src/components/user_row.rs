@@ -19,8 +19,9 @@ impl Component for AvatarIcon {
   fn render(&self) -> impl IntoElement {
     let (url, border) = avatar_url_and_border(&self.user);
     rect()
-      .width(Size::px(50.))
-      .height(Size::px(50.))
+      .width(Size::px(30.))
+      .height(Size::px(30.))
+      .margin(Gaps::new(0., 6., 0., 6.))
       .corner_radius(CornerRadius::new_all(25.))
       .child(
         avatar_image(&url, border)
@@ -46,7 +47,8 @@ impl Component for UserLabel {
       .main_align(Alignment::Center)
       .cross_align(Alignment::Center)
       .height(Size::percent(70.))
-      .background(colors::GRAY)
+      // .background(colors::GRAY)
+      .background(colors::TRANSPARENT)
       .corner_radius(CornerRadius::new_all(5.))
       .margin(Gaps::new(0., 6., 0., 6.))
       .child(
@@ -98,9 +100,9 @@ impl Component for UserRow {
     let is_speaking = self.user.voice_state == UserVoiceState::Speaking;
 
     let opacity = if !is_speaking && (self.is_voice_semitransparent && !self.is_open) {
-      0.5
+      0.75
     } else {
-      1.0
+      0.95
     };
 
     let label = UserLabel {
@@ -114,12 +116,18 @@ impl Component for UserRow {
       .direction(Direction::Horizontal)
       .main_align(Alignment::Start)
       .cross_align(Alignment::Center)
+      .width(Size::px(175.))
       .height(Size::px(50.))
-      .margin(Gaps::new_all(6.))
+      // .padding(Gaps::new_all(6.))
+      .padding(Gaps::new_all(0.3))
+      // .margin(Gaps::new_all(0.))
+      .margin(Gaps::new(0.6, 0., 0.6, 0.))
+      .corner_radius(CornerRadius::new_all(6.))
+      .background(colors::DARKISH_GRAY)
       .opacity(opacity);
 
     if is_right_aligned {
-      row.child(label).child(icon)
+      row.child(icon).child(label)
     } else {
       row.child(icon).child(label)
     }

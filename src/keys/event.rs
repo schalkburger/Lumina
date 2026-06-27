@@ -2,4 +2,5 @@
 pub enum KeyEvent {
   ToggleOverlay,
   OpenConfigurator,
+  Quit,
 }

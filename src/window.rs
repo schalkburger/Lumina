@@ -1,7 +1,5 @@
 use freya::prelude::*;
 
-use crate::warn;
-
 pub fn set_clickable(clickable: bool) {
   Platform::get().with_window(None, move |w| {
     let _ = w.set_cursor_hittest(clickable);
