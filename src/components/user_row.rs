@@ -22,9 +22,9 @@ impl Component for AvatarIcon {
   fn render(&self) -> impl IntoElement {
     let (url, border) = avatar_url_and_border(&self.user);
     rect()
-      .width(Size::px(30.))
-      .height(Size::px(30.))
-      .margin(Gaps::new(0., 6., 0., 6.))
+      .width(Size::px(45.))
+      .height(Size::px(45.))
+      .margin(Gaps::new(0., 6., 0., 8.))
       .corner_radius(CornerRadius::new_all(25.))
       .child(
         avatar_image(&url, border)
@@ -120,8 +120,8 @@ impl Component for UserRow {
       .direction(Direction::Horizontal)
       .main_align(Alignment::Start)
       .cross_align(Alignment::Center)
-      .width(Size::px(175.))
-      .height(Size::px(50.))
+      .width(Size::px(200.))
+      .height(Size::px(60.))
       .padding(Gaps::new_all(0.3))
       .margin(Gaps::new(2.0, 0.0, 2.0, 0.))
       .corner_radius(CornerRadius::new_all(6.))

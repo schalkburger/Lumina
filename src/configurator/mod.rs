@@ -4,7 +4,7 @@ use freya::prelude::*;
 use crate::{
   app_state::SharedAppState,
   config::{Config, TransportMode, load_config, save_config},
-  util::colors::{GRAY, MUTED_GRAY, TRANSPARENT},
+  util::colors::{GRAY, MUTED_GRAY, TRANSPARENT, DARKISH_BLUE},
 };
 
 #[cfg(not(target_os = "macos"))]
@@ -20,8 +20,8 @@ mod keybind;
 mod setting;
 mod toggle;
 
-const WIDTH: f32 = 600.;
-const HEIGHT: f32 = 600.;
+const WIDTH: f32 = 500.;
+const HEIGHT: f32 = 400.;
 
 const TRANSPORT_MODES: &[&str] = &["ipc", "websocket"];
 
@@ -60,7 +60,7 @@ pub fn open_configurator_standalone() {
 
 fn configurator_window(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> WindowConfig {
   WindowConfig::new(move || configurator(shared.clone(), redraw_tx.clone()))
-    .with_background(GRAY)
+    .with_background(DARKISH_BLUE)
     .with_size(WIDTH as f64, HEIGHT as f64)
     .with_title("Orbolay Configurator")
     .with_resizable(false)
@@ -131,7 +131,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     .child(SettingRow {
       name: "Connection Mode".into(),
       description: Some(
-        "Set the communication method between Orbolay and Discord. If using an offical client, use \"ipc\", otherwise, use \"websocket\"."
+        "Set the communication method between Orbolay and Discord. If using an official client, use \"ipc\", otherwise, use \"websocket\"."
           .into(),
       ),
       kind: SettingKind::Dropdown(
