@@ -3,7 +3,10 @@ use freya::prelude::*;
 
 use crate::{
   user::{User, UserVoiceState},
-  util::{colors, image::avatar_image},
+  util::{
+    colors::{self, parse_hex},
+    image::avatar_image,
+  },
 };
 
 static DEAFENED_SVG: &[u8] = include_bytes!("../../assets/deafened.svg");
@@ -92,6 +95,7 @@ pub struct UserRow {
   pub is_right_aligned: bool,
   pub is_open: bool,
   pub is_voice_semitransparent: bool,
+  pub background: Option<String>,
 }
 
 impl Component for UserRow {
@@ -102,7 +106,7 @@ impl Component for UserRow {
     let opacity = if !is_speaking && (self.is_voice_semitransparent && !self.is_open) {
       0.75
     } else {
-      0.95
+      0.90
     };
 
     let label = UserLabel {
@@ -118,12 +122,15 @@ impl Component for UserRow {
       .cross_align(Alignment::Center)
       .width(Size::px(175.))
       .height(Size::px(50.))
-      // .padding(Gaps::new_all(6.))
       .padding(Gaps::new_all(0.3))
-      // .margin(Gaps::new_all(0.))
-      .margin(Gaps::new(0.6, 0., 0.6, 0.))
+      .margin(Gaps::new(2.0, 0.0, 2.0, 0.))
       .corner_radius(CornerRadius::new_all(6.))
-      .background(colors::DARKISH_GRAY)
+      .background(
+        self.background
+          .as_deref()
+          .and_then(parse_hex)
+          .unwrap_or(colors::DARKISH_BLUE),
+      )
       .opacity(opacity);
 
     if is_right_aligned {
@@ -136,7 +143,7 @@ impl Component for UserRow {
 
 fn avatar_url_and_border(user: &User) -> (String, Option<SkColor>) {
   let border_color = match user.voice_state {
-    UserVoiceState::Speaking => Some(SkColor::from_rgb(67, 147, 120)),
+    UserVoiceState::Speaking => Some(SkColor::from_rgb(47, 186, 139)),
     UserVoiceState::Deafened | UserVoiceState::Muted => Some(SkColor::from_rgb(218, 62, 68)),
     _ => None,
   };

@@ -12,6 +12,7 @@ use crate::keys::bind::{DEFAULT_OVERLAY_TOGGLE, keys_to_strings, strings_to_keys
 
 use setting::{SettingChange, SettingKind, SettingRow};
 
+mod color_input;
 mod dropdown;
 mod input;
 #[cfg(not(target_os = "macos"))]
@@ -254,6 +255,21 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       kind: SettingKind::Toggle(config.messages_semitransparent),
       on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
         cfg.messages_semitransparent = v == "true";
+      }),
+      disabled: false,
+    })
+    .child(divider())
+    .child(SettingRow {
+      name: "User Row Background".into(),
+      description: Some("Background color for voice user rows (hex, e.g. #FF252B32)".into()),
+      kind: SettingKind::ColorInput(Some(
+        config
+          .user_row_background
+          .clone()
+          .unwrap_or_else(|| "#FF252B32".into()),
+      )),
+      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
+        cfg.user_row_background = Some(v);
       }),
       disabled: false,
     })

@@ -45,17 +45,31 @@ pub fn window_size_for_display(display: &DisplayInfo) -> PhysicalSize<f64> {
 }
 
 pub fn update_monitor() {
+  let config = load_config().unwrap_or_default();
   let display = specific_monitor_or_primary();
   let monitor_position = (display.x, display.y);
 
   let new_size = window_size_for_display(&display);
 
   Platform::get().with_window(None, move |w| {
-    w.set_outer_position(PhysicalPosition::new(
-      monitor_position.0,
-      monitor_position.1,
-    ));
+    if config.window_position.is_none() {
+      w.set_outer_position(PhysicalPosition::new(
+        monitor_position.0,
+        monitor_position.1,
+      ));
+    }
 
     let _ = w.request_inner_size(new_size);
+  });
+}
+
+pub fn save_window_position() {
+  Platform::get().with_window(None, |w| {
+    if let Ok(pos) = w.outer_position() {
+      let config_load = load_config().unwrap_or_default();
+      let mut config = config_load;
+      config.window_position = Some((pos.x, pos.y));
+      crate::config::save_config(&config);
+    }
   });
 }

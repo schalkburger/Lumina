@@ -185,6 +185,10 @@ pub struct Config {
   pub transport_mode: TransportMode,
   #[serde(default)]
   pub software_rendering: Option<bool>,
+  #[serde(default)]
+  pub user_row_background: Option<String>,
+  #[serde(default)]
+  pub window_position: Option<(i32, i32)>,
 }
 
 impl Default for Config {
@@ -205,6 +209,8 @@ impl Default for Config {
       is_keybind_enabled: None,
       transport_mode: TransportMode::Ipc,
       software_rendering: None,
+      user_row_background: Some("#FF252B32".into()),
+      window_position: None,
     }
   }
 }

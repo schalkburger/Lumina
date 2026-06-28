@@ -50,6 +50,9 @@ pub fn watch_keybinds(shared: SharedAppState, keybind_tx: flume::Sender<KeyEvent
         {
           let mut kbs = keybinds.write().unwrap();
           for kb in kbs.iter_mut() {
+            if matches!(kb.event, KeyEvent::ToggleOverlay) && kb.keys == overlay_keys {
+              break;
+            }
             if matches!(kb.event, KeyEvent::ToggleOverlay) && kb.keys != overlay_keys {
               kb.keys = overlay_keys.clone();
               kb.reset();

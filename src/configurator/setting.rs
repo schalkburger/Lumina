@@ -4,7 +4,10 @@ use freya::prelude::*;
 use rdev::Key;
 
 use crate::{
-  configurator::{dropdown::DropdownControl, input::InputControl, toggle::ToggleControl},
+  configurator::{
+    color_input::ColorInputControl, dropdown::DropdownControl, input::InputControl,
+    toggle::ToggleControl,
+  },
   util::colors::MUTED_GRAY,
 };
 
@@ -32,6 +35,7 @@ pub enum SettingKind {
   Toggle(bool),
   Dropdown(Vec<String>, Option<String>),
   Input(Option<String>),
+  ColorInput(Option<String>),
   #[cfg(not(target_os = "macos"))]
   Keybind(Option<Vec<Key>>),
 }
@@ -44,6 +48,7 @@ impl Component for SettingRow {
     let oc_toggle = self.on_change.clone();
     let oc_dropdown = self.on_change.clone();
     let oc_input = self.on_change.clone();
+    let oc_color = self.on_change.clone();
     #[cfg(not(target_os = "macos"))]
     let oc_keybind = self.on_change.clone();
 
@@ -57,6 +62,10 @@ impl Component for SettingRow {
     };
     let input_initial = match &self.kind {
       SettingKind::Input(initial) => Some(initial.clone()),
+      _ => None,
+    };
+    let color_initial = match &self.kind {
+      SettingKind::ColorInput(initial) => Some(initial.clone()),
       _ => None,
     };
     #[cfg(not(target_os = "macos"))]
@@ -94,6 +103,12 @@ impl Component for SettingRow {
             el.child(InputControl::new(
               initial,
               EventHandler::new(move |v: String| oc_input.call(SettingChange::Value(v))),
+            ))
+          })
+          .map(color_initial, move |el, initial| {
+            el.child(ColorInputControl::new(
+              initial,
+              EventHandler::new(move |v: String| oc_color.call(SettingChange::Value(v))),
             ))
           });
 

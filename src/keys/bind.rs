@@ -73,6 +73,7 @@ pub fn default_keybinds() -> Vec<Keybind> {
       strings_to_keys(DEFAULT_OVERLAY_TOGGLE.clone()),
       KeyEvent::ToggleOverlay,
     ),
+    Keybind::new(vec![Key::Escape], KeyEvent::ToggleOverlay),
     Keybind::new(vec![Key::KeyC], KeyEvent::OpenConfigurator),
     Keybind::new(
       strings_to_keys(DEFAULT_QUIT.clone()),

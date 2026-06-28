@@ -20,7 +20,9 @@ use crate::{
   config::{is_first_run, load_config, save_config},
   config_watcher::start_config_watcher,
   configurator::{open_configurator, open_configurator_standalone},
-  display::{specific_monitor_or_primary, update_monitor, window_size_for_display},
+  display::{
+    save_window_position, specific_monitor_or_primary, update_monitor, window_size_for_display,
+  },
   manager::OverlayManager,
   notifications::create_notification_thread,
   payloads::{Notification, NotificationAction, NotificationKind},
@@ -132,6 +134,11 @@ fn main() {
   // Compute the initial window size for the chosen display.
   let window_size = window_size_for_display(&display);
 
+  let initial_position = config
+    .window_position
+    .map(|(x, y)| PhysicalPosition::new(x, y))
+    .unwrap_or_else(|| PhysicalPosition::new(monitor_position.0, monitor_position.1));
+
   #[cfg(target_os = "linux")]
   {
     let session_type = std::env::var("XDG_SESSION_TYPE").unwrap_or_default();
@@ -162,10 +169,7 @@ fn main() {
               .with_inner_size(window_size)
               .with_resizable(false)
               .with_window_level(WindowLevel::AlwaysOnTop)
-              .with_position(PhysicalPosition::new(
-                monitor_position.0,
-                monitor_position.1,
-              ));
+              .with_position(initial_position);
 
             #[cfg(target_os = "windows")]
             {
@@ -302,6 +306,7 @@ fn app() -> impl IntoElement {
     let is_open = app_state.read().is_open;
     if !is_open {
       soundboard_open.set(false);
+      save_window_position();
     }
     window::set_clickable(is_open);
   });
@@ -337,6 +342,16 @@ fn app() -> impl IntoElement {
           OverlayManager::close(app_state);
         }),
     )
+    // Drag handle (top 40px, only when open)
+    .maybe(is_open, |el| {
+      el.child(
+        rect()
+          .position(Position::new_absolute().top(0.).left(0.))
+          .width(Size::fill())
+          .height(Size::px(40.))
+          .window_drag(),
+      )
+    })
     // Voice users
     .child(VoiceSection {
       voice_users,
@@ -349,6 +364,7 @@ fn app() -> impl IntoElement {
       user_offset_x: config.user_offset_x,
       user_offset_y: config.user_offset_y,
       display_voice_members: config.display_voice_members.clone().unwrap_or_default(),
+      user_row_background: config.user_row_background.clone(),
     })
     // Messages
     .child(MessagesSection {

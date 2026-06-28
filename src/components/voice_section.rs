@@ -16,6 +16,7 @@ pub struct VoiceSection {
   pub user_offset_x: i32,
   pub user_offset_y: i32,
   pub display_voice_members: DisplayVoiceMembers,
+  pub user_row_background: Option<String>,
 }
 
 impl Component for VoiceSection {
@@ -62,6 +63,7 @@ impl Component for VoiceSection {
             self.display_voice_members,
             DisplayVoiceMembers::AlwaysSemiTransparent
           ),
+          background: self.user_row_background.clone(),
         })
       },
     )
