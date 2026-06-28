@@ -29,7 +29,7 @@ impl Keybind {
   }
 
   pub fn matches(&self, pressed: &[Key]) -> bool {
-    pressed.len() == self.keys.len() && self.keys.iter().all(|k| pressed.contains(k))
+    !self.keys.is_empty() && self.keys.iter().all(|k| pressed.contains(k))
   }
 
   pub fn active(&self) -> bool {
@@ -73,7 +73,7 @@ pub fn default_keybinds() -> Vec<Keybind> {
       strings_to_keys(DEFAULT_OVERLAY_TOGGLE.clone()),
       KeyEvent::ToggleOverlay,
     ),
-    Keybind::new(vec![Key::Escape], KeyEvent::ToggleOverlay),
+    Keybind::new(vec![Key::Escape], KeyEvent::CloseOverlay),
     Keybind::new(vec![Key::KeyC], KeyEvent::OpenConfigurator),
     Keybind::new(
       strings_to_keys(DEFAULT_QUIT.clone()),

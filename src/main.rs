@@ -288,6 +288,9 @@ fn app() -> impl IntoElement {
             let mut state = app_state.write();
             state.is_open = !state.is_open;
           }
+          keys::KeyEvent::CloseOverlay => {
+            app_state.write().is_open = false;
+          }
           keys::KeyEvent::OpenConfigurator if app_state.read().is_open => {
             open_configurator(shared.clone(), redraw_tx.clone());
             app_state.write().is_open = false;
