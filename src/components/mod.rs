@@ -3,7 +3,7 @@ mod message_row;
 mod messages_section;
 mod soundboard;
 mod user_row;
-mod voice_controls;
+pub mod voice_controls;
 mod voice_section;
 
 pub use action_button::ActionButton;

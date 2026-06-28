@@ -2,7 +2,7 @@ use freya::prelude::*;
 use serde_json::Value;
 
 use crate::{
-  app_state::AppState,
+  app_state::{AppState, SharedAppState},
   config::TransportMode,
   user::{User, UserVoiceState},
   util::{bridge::BridgeMessage, colors},
@@ -15,6 +15,16 @@ static MUTE_SVG: &[u8] = include_bytes!("../../assets/mute.svg");
 static DISCONNECT_SVG: &[u8] = include_bytes!("../../assets/disconnect.svg");
 static STOP_STREAM_SVG: &[u8] = include_bytes!("../../assets/stopstream.svg");
 static SOUNDBOARD_SVG: &[u8] = include_bytes!("../../assets/speaker.svg");
+static SETTINGS_SVG: &[u8] = include_bytes!("../../assets/settings.svg");
+
+#[derive(Clone)]
+pub struct RedrawSender(pub flume::Sender<()>);
+
+impl PartialEq for RedrawSender {
+  fn eq(&self, other: &Self) -> bool {
+    std::ptr::eq(&self.0 as *const _, &other.0 as *const _)
+  }
+}
 
 #[derive(PartialEq)]
 struct ControlButton {
@@ -42,9 +52,9 @@ impl Component for ControlButton {
       .cross_align(Alignment::Center)
       .height(Size::fill())
       .width(Size::percent(20.))
-      .margin(Gaps::new_all(6.))
-      .padding(Gaps::new_all(6.))
-      .corner_radius(CornerRadius::new_all(10.))
+      .margin(Gaps::new(2., 2., 2., 2.))
+      .padding(Gaps::new_all(4.))
+      .corner_radius(CornerRadius::new_all(6.))
       .background(if *hovered.read() {
         if is_red {
           colors::RED_GRAY
@@ -63,21 +73,30 @@ impl Component for ControlButton {
         *hovered.write() = false;
         Cursor::set(CursorIcon::default());
       })
-      .child(svg(icon).width(Size::px(24.)).height(Size::px(24.)))
+      .child(svg(icon).width(Size::px(18.)).height(Size::px(18.)))
   }
 }
 
-#[derive(PartialEq)]
 pub struct VoiceControls {
   pub user: User,
   pub app_state: State<AppState>,
   pub soundboard_open: State<bool>,
+  pub shared: SharedAppState,
+  pub redraw_tx: RedrawSender,
+}
+
+impl PartialEq for VoiceControls {
+  fn eq(&self, other: &Self) -> bool {
+    self.user == other.user
+  }
 }
 
 impl Component for VoiceControls {
   fn render(&self) -> impl IntoElement {
     let mut app_state = self.app_state;
     let mut soundboard_open = self.soundboard_open;
+    let shared = self.shared.clone();
+    let redraw_tx = self.redraw_tx.clone();
     let is_muted = self.user.voice_state == UserVoiceState::Muted;
     let is_deafened = self.user.voice_state == UserVoiceState::Deafened;
     let is_streaming = self.user.streaming;
@@ -87,10 +106,10 @@ impl Component for VoiceControls {
       .main_align(Alignment::Center)
       .cross_align(Alignment::Center)
       .height(Size::auto())
-      .max_height(Size::px(60.))
-      .max_width(Size::px(400.))
+      .max_height(Size::px(40.))
+      .max_width(Size::px(300.))
       .background(colors::GRAY)
-      .corner_radius(CornerRadius::new_all(10.))
+      .corner_radius(CornerRadius::new_all(8.))
       .child(ControlButton {
         icon: if is_muted || is_deafened {
           MUTED_SVG
@@ -158,6 +177,14 @@ impl Component for VoiceControls {
           })
           .into(),
         })
+      })
+      .child(ControlButton {
+        icon: SETTINGS_SVG,
+        is_red: false,
+        on_click: (move |()| {
+          crate::configurator::open_configurator(shared.clone(), redraw_tx.0.clone());
+        })
+        .into(),
       })
   }
 }
