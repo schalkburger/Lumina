@@ -5,6 +5,7 @@
 #![allow(clippy::borrow_interior_mutable_const)]
 #![allow(clippy::declare_interior_mutable_const)]
 
+// use std::sync::Arc;
 use freya::prelude::*;
 use gumdrop::Options;
 use native_dialog::{MessageDialogBuilder, MessageLevel};
@@ -14,7 +15,7 @@ use winit::{dpi::PhysicalPosition, window::WindowLevel};
 
 use crate::{
   app_state::{AppState, SharedAppState},
-  components::{MessagesSection, Soundboard, VoiceSection, voice_controls::RedrawSender},
+  components::{MessagesSection, Soundboard, VoiceControls, VoiceSection, voice_controls::RedrawSender},
   config::{is_first_run, load_config, save_config},
   config_watcher::start_config_watcher,
   configurator::{open_configurator, open_configurator_standalone},
@@ -23,6 +24,7 @@ use crate::{
   },
   manager::OverlayManager,
   notifications::create_notification_thread,
+  payloads::{Notification, NotificationAction, NotificationKind},
   transport::create_transport_thread,
   updates::maybe_notify_update,
   util::{bridge::BridgeMessage, colors},
@@ -223,6 +225,22 @@ fn app() -> impl IntoElement {
     create_transport_thread(shared.clone(), redraw_tx.clone(), args, ws_receiver);
     create_notification_thread(shared.clone(), redraw_tx.clone());
 
+        shared.write().unwrap().notify(Notification {
+      title: format!(
+        "Orbolay Enhanced v{} (rev {})",
+        APP_VERSION.unwrap_or("0.0.0"),
+        GIT_HASH.unwrap_or("unknown")
+      ),
+      body: String::new(),
+      icon: String::new(),
+      timestamp: Some(chrono::Utc::now().timestamp()),
+      timeout_secs: 3,
+      guild_id: None,
+      channel_id: None,
+      message_id: None,
+      actions: None,
+    });
+
     // sync SharedAppState -> AppState on every redraw signal
     let shared_sync = shared.clone();
     spawn_forever(async move {
@@ -362,10 +380,9 @@ fn app() -> impl IntoElement {
           .window_drag(),
       )
     })
-    // Voice users + controls
+    // Voice users
     .child(VoiceSection {
       voice_users,
-      current_user,
       is_open,
       is_censor,
       user_alignment: config
@@ -376,10 +393,23 @@ fn app() -> impl IntoElement {
       user_offset_y: config.user_offset_y,
       display_voice_members: config.display_voice_members.clone().unwrap_or_default(),
       user_row_background: config.user_row_background.clone(),
-      app_state,
-      soundboard_open,
-      shared: shared.clone(),
-      redraw_tx: redraw_tx.clone(),
+    })
+    // Voice controls (top center)
+    .maybe(is_open && current_user.is_some(), |el| {
+      el.child(
+        rect()
+          .position(Position::new_absolute().top(0.).left(0.))
+          .width(Size::fill())
+          .height(Size::auto())
+          .cross_align(Alignment::Center)
+          .child(VoiceControls {
+            user: current_user.unwrap(),
+            app_state,
+            soundboard_open,
+            shared: shared.clone(),
+            redraw_tx: redraw_tx.clone(),
+          }),
+      )
     })
     // Messages
     .child(MessagesSection {

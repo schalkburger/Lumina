@@ -8,7 +8,7 @@ use rdev::Key;
 use super::event::KeyEvent;
 
 pub const DEFAULT_OVERLAY_TOGGLE: LazyCell<Vec<String>> =
-  LazyCell::new(|| vec!["ControlLeft".into(), "BackQuote".into()]);
+  LazyCell::new(|| vec!["ControlLeft".into(), "F12".into()]);
 
 pub const DEFAULT_QUIT: LazyCell<Vec<String>> =
   LazyCell::new(|| vec!["ControlLeft".into(), "KeyQ".into()]);
