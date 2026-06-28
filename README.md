@@ -1,3 +1,15 @@
+# Orbolay Enhanced
+
+# How to Use
+
+| Action  | Keybind |   |
+|---------------|-----------|---|
+| Open overlay  | Alt + F12 |   |
+| Close overlay | Q         |   |
+
+
+---
+
 <div align="center">
   <h1>Orbolay</h1>
   <p>Quick, small, native, multi-platform Discord overlay alternative</p>
