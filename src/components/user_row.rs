@@ -129,9 +129,10 @@ impl Component for UserRow {
         self.background
           .as_deref()
           .and_then(parse_hex)
-          .unwrap_or(colors::DARKISH_BLUE),
-      )
-      .opacity(opacity);
+          .unwrap_or(colors::DARKISH_BLUE),   
+      )  
+      .opacity(opacity)
+      .border(Border::new().fill(colors::LIGHT_GRAY).width(1.));
 
     if is_right_aligned {
       row.child(icon).child(label)
