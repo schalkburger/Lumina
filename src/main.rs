@@ -5,8 +5,6 @@
 #![allow(clippy::borrow_interior_mutable_const)]
 #![allow(clippy::declare_interior_mutable_const)]
 
-use std::sync::Arc;
-
 use freya::prelude::*;
 use gumdrop::Options;
 use native_dialog::{MessageDialogBuilder, MessageLevel};
@@ -25,7 +23,6 @@ use crate::{
   },
   manager::OverlayManager,
   notifications::create_notification_thread,
-  payloads::{Notification, NotificationAction, NotificationKind},
   transport::create_transport_thread,
   updates::maybe_notify_update,
   util::{bridge::BridgeMessage, colors},
@@ -225,28 +222,6 @@ fn app() -> impl IntoElement {
 
     create_transport_thread(shared.clone(), redraw_tx.clone(), args, ws_receiver);
     create_notification_thread(shared.clone(), redraw_tx.clone());
-
-    shared.write().unwrap().notify(Notification {
-      title: format!(
-        "Orbolay v{} (rev {})",
-        APP_VERSION.unwrap_or("0.0.0"),
-        GIT_HASH.unwrap_or("unknown")
-      ),
-      body: "by SpikeHD".to_string(),
-      timestamp: Some(chrono::Utc::now().timestamp()),
-      timeout_secs: 5,
-      icon: "https://avatars.githubusercontent.com/u/25207995?v=4".to_string(),
-      guild_id: None,
-      channel_id: None,
-      message_id: None,
-      actions: Some(vec![NotificationAction {
-        label: "GitHub".into(),
-        action: Arc::new(|| {
-          let _ = open::that("https://github.com/SpikeHD/Orbolay");
-        }),
-        kind: NotificationKind::Primary,
-      }]),
-    });
 
     // sync SharedAppState -> AppState on every redraw signal
     let shared_sync = shared.clone();
