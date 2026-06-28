@@ -63,7 +63,7 @@ fn configurator_window(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> 
     .with_background(DARKISH_BLUE)
     .with_size(WIDTH as f64, HEIGHT as f64)
     .with_title("Orbolay Configurator")
-    .with_resizable(false)
+    .with_resizable(true)
 }
 
 fn make_updater(
@@ -71,6 +71,7 @@ fn make_updater(
   redraw_tx: flume::Sender<()>,
   mut local_config: State<Config>,
   update_fn: impl Fn(&mut Config, String) + 'static,
+  
 ) -> EventHandler<SettingChange> {
   EventHandler::new(move |change: SettingChange| {
     if let SettingChange::Value(value) = change {

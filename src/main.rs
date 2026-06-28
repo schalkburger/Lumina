@@ -15,7 +15,9 @@ use winit::{dpi::PhysicalPosition, window::WindowLevel};
 
 use crate::{
   app_state::{AppState, SharedAppState},
-  components::{MessagesSection, Soundboard, VoiceControls, VoiceSection, voice_controls::RedrawSender},
+  components::{
+    MessagesSection, Soundboard, VoiceControls, VoiceSection, voice_controls::RedrawSender,
+  },
   config::{is_first_run, load_config, save_config},
   config_watcher::start_config_watcher,
   configurator::{open_configurator, open_configurator_standalone},
@@ -24,7 +26,7 @@ use crate::{
   },
   manager::OverlayManager,
   notifications::create_notification_thread,
-  payloads::{Notification, NotificationAction, NotificationKind},
+  payloads::Notification,
   transport::create_transport_thread,
   updates::maybe_notify_update,
   util::{bridge::BridgeMessage, colors},
@@ -225,7 +227,7 @@ fn app() -> impl IntoElement {
     create_transport_thread(shared.clone(), redraw_tx.clone(), args, ws_receiver);
     create_notification_thread(shared.clone(), redraw_tx.clone());
 
-        shared.write().unwrap().notify(Notification {
+    shared.write().unwrap().notify(Notification {
       title: format!(
         "Orbolay Enhanced v{} (rev {})",
         APP_VERSION.unwrap_or("0.0.0"),
@@ -234,7 +236,7 @@ fn app() -> impl IntoElement {
       body: String::new(),
       icon: String::new(),
       timestamp: Some(chrono::Utc::now().timestamp()),
-      timeout_secs: 3,
+      timeout_secs: 2,
       guild_id: None,
       channel_id: None,
       message_id: None,
