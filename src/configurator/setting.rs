@@ -6,7 +6,7 @@ use rdev::Key;
 use crate::{
   configurator::{
     color_input::ColorInputControl, dropdown::DropdownControl, input::InputControl,
-    toggle::ToggleControl,
+    slider::SliderControl, toggle::ToggleControl,
   },
   util::colors::MUTED_GRAY,
 };
@@ -36,6 +36,12 @@ pub enum SettingKind {
   Dropdown(Vec<String>, Option<String>),
   Input(Option<String>),
   ColorInput(Option<String>),
+  Slider {
+    value: f64,
+    min: f64,
+    max: f64,
+    step: f64,
+  },
   #[cfg(not(target_os = "macos"))]
   Keybind(Option<Vec<Key>>),
 }
@@ -49,6 +55,7 @@ impl Component for SettingRow {
     let oc_dropdown = self.on_change.clone();
     let oc_input = self.on_change.clone();
     let oc_color = self.on_change.clone();
+    let oc_slider = self.on_change.clone();
     #[cfg(not(target_os = "macos"))]
     let oc_keybind = self.on_change.clone();
 
@@ -66,6 +73,10 @@ impl Component for SettingRow {
     };
     let color_initial = match &self.kind {
       SettingKind::ColorInput(initial) => Some(initial.clone()),
+      _ => None,
+    };
+    let slider_data = match &self.kind {
+      SettingKind::Slider { value, min, max, step } => Some((*value, *min, *max, *step)),
       _ => None,
     };
     #[cfg(not(target_os = "macos"))]
@@ -109,6 +120,15 @@ impl Component for SettingRow {
             el.child(ColorInputControl::new(
               initial,
               EventHandler::new(move |v: String| oc_color.call(SettingChange::Value(v))),
+            ))
+          })
+          .map(slider_data, move |el, (value, min, max, step)| {
+            el.child(SliderControl::new(
+              value,
+              min,
+              max,
+              step,
+              EventHandler::new(move |v: String| oc_slider.call(SettingChange::Value(v))),
             ))
           });
 

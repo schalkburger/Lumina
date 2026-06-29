@@ -229,14 +229,14 @@ fn app() -> impl IntoElement {
 
     shared.write().unwrap().notify(Notification {
       title: format!(
-        "Lamina Enhanced v{} (rev {})",
+        "Lamina v{} (rev {})",
         APP_VERSION.unwrap_or("0.0.0"),
         GIT_HASH.unwrap_or("unknown")
       ),
       body: String::new(),
       icon: String::new(),
       timestamp: Some(chrono::Utc::now().timestamp()),
-      timeout_secs: 2,
+      timeout_secs: 4,
       guild_id: None,
       channel_id: None,
       message_id: None,

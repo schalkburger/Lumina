@@ -4,7 +4,7 @@ use freya::prelude::*;
 use crate::{
   app_state::SharedAppState,
   config::{Config, TransportMode, load_config, save_config},
-  util::colors::{DARKISH_BLUE, GRAY, MUTED_GRAY, LIGHT_GRAY},
+  util::colors::{self, DARKISH_BLUE, GRAY, MUTED_GRAY, LIGHT_GRAY, SUPERLIGHT_GRAY, DARKER_GRAY},
 };
 
 #[cfg(not(target_os = "macos"))]
@@ -18,9 +18,10 @@ mod input;
 #[cfg(not(target_os = "macos"))]
 mod keybind;
 mod setting;
+mod slider;
 mod toggle;
 
-const WIDTH: f32 = 500.;
+const WIDTH: f32 = 450.;
 const HEIGHT: f32 = 600.;
 
 const TRANSPORT_MODES: &[&str] = &["ipc", "websocket"];
@@ -278,11 +279,16 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
         cfg.user_alignment = Some(v);
       }),
       disabled: false,
-    })    
+    })
     .child(SettingRow {
       name: "Voice X Offset (px)".into(),
       description: None,
-      kind: SettingKind::Input(Some(config.user_offset_x.to_string())),
+      kind: SettingKind::Slider {
+        value: config.user_offset_x as f64,
+        min: 0.0,
+        max: 200.0,
+        step: 1.0,
+      },
       on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
         if let Ok(n) = v.trim().parse::<i32>() {
           cfg.user_offset_x = n;
@@ -293,14 +299,19 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     .child(SettingRow {
       name: "Voice Y Offset (px)".into(),
       description: None,
-      kind: SettingKind::Input(Some(config.user_offset_y.to_string())),
+      kind: SettingKind::Slider {
+        value: config.user_offset_y as f64,
+        min: 0.0,
+        max: 200.0,
+        step: 1.0,
+      },
       on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
         if let Ok(n) = v.trim().parse::<i32>() {
           cfg.user_offset_y = n;
         }
       }),
       disabled: false,
-    })    
+    })
     .child(divider())
     .child(SettingRow {
       name: "Semi-Transparent Notifications".into(),
@@ -354,15 +365,40 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       }),
       disabled: false,
     })
-    .child(
-      label()
-        .text("Press \"C\" with the overlay open to open this window again!")
-        .color(MUTED_GRAY)
-        .font_size(12.)
-        .margin(16.)
-        .text_align(TextAlign::Center)
-        .width(Size::fill()),
-    );
+    .child(divider())
+    .child({
+      let path = crate::config::config_dir()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default();
+      let path_display = path.clone();
+      rect()
+        .width(Size::fill())
+        .padding(Gaps::new(10., 12., 10., 12.))
+        .margin(Gaps::new(10., 0., 10., 0.))
+        .background(colors::DARKER_GRAY)
+        .corner_radius(CornerRadius::new_all(4.))
+        .on_press(move |_| {
+          let _ = open::that(&path);
+        })
+        .child(
+          label()
+            .text(format!("Open config folder: {}", path_display))
+            .color(SUPERLIGHT_GRAY)
+            .font_size(12.)
+            .text_align(TextAlign::Center)
+            .width(Size::fill()),
+        )
+    });
+    // .child(divider())
+    // .child(
+    //   label()
+    //     .text("Press \"C\" with the overlay open to open this window again!")
+    //     .color(SUPERLIGHT_GRAY)
+    //     .font_size(12.)
+    //     .margin(16.)
+    //     .text_align(TextAlign::Center)
+    //     .width(Size::fill()),
+    // );
 
   rect()
     .width(Size::fill())
