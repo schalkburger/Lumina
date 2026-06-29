@@ -117,7 +117,7 @@ impl Component for UserRow {
     let is_speaking = self.user.voice_state == UserVoiceState::Speaking;
 
     let opacity = if !is_speaking && (self.is_voice_semitransparent && !self.is_open) {
-      0.45
+      0.75
     } else {
       0.90
     };

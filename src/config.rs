@@ -198,7 +198,7 @@ impl Default for Config {
       overlay_keybind: Some(DEFAULT_OVERLAY_TOGGLE.clone()),
       display_idx: None,
       port: Some(6888),
-      message_alignment: None,
+      message_alignment: Some("topleft".into()),
       user_alignment: Some("topright".into()),
       message_offset_x: 0,
       message_offset_y: 0,

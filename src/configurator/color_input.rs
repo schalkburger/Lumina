@@ -40,6 +40,6 @@ impl Component for ColorInputControl {
           .background(swatch_color)
           .margin(Gaps::new(0., 6., 0., 0.)),
       )
-      .child(Input::new(value).a11y_id(id).width(Size::px(90.)))
+      .child(Input::new(value).a11y_id(id).width(Size::px(100.)))
   }
 }

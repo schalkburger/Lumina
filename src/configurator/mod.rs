@@ -4,7 +4,7 @@ use freya::prelude::*;
 use crate::{
   app_state::SharedAppState,
   config::{Config, TransportMode, load_config, save_config},
-  util::colors::{DARKISH_BLUE, GRAY, MUTED_GRAY, TRANSPARENT},
+  util::colors::{DARKISH_BLUE, GRAY, MUTED_GRAY, LIGHT_GRAY},
 };
 
 #[cfg(not(target_os = "macos"))]
@@ -62,7 +62,7 @@ fn configurator_window(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> 
   WindowConfig::new(move || configurator(shared.clone(), redraw_tx.clone()))
     .with_background(DARKISH_BLUE)
     .with_size(WIDTH as f64, HEIGHT as f64)
-    .with_title("Lamina Configurator")
+    .with_title("Lamina Settings")
     .with_resizable(true)
 }
 
@@ -278,8 +278,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
         cfg.user_alignment = Some(v);
       }),
       disabled: false,
-    })
-    .child(divider())
+    })    
     .child(SettingRow {
       name: "Voice X Offset (px)".into(),
       description: None,
@@ -291,7 +290,6 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       }),
       disabled: false,
     })
-    .child(divider())
     .child(SettingRow {
       name: "Voice Y Offset (px)".into(),
       description: None,
@@ -303,6 +301,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       }),
       disabled: false,
     })    
+    .child(divider())
     .child(SettingRow {
       name: "Semi-Transparent Notifications".into(),
       description: Some("Fade notifications when the overlay is closed".into()),
@@ -384,5 +383,5 @@ fn divider() -> impl IntoElement {
     .width(Size::fill())
     .height(Size::px(1.))
     .padding(16.)
-    .background(TRANSPARENT)
+    .background(LIGHT_GRAY)
 }

@@ -172,7 +172,7 @@ impl Component for KeybindControl {
       .border(border)
       .corner_radius(theme_layout.corner_radius)
       .padding(theme_layout.inner_margin)
-      .width(Size::px(300.0))
+      .width(Size::px(200.0))
       .height(Size::px(32.0))
       .main_align(Alignment::Center)
       .cross_align(Alignment::Start)
