@@ -143,7 +143,7 @@ jobs:
         if: matrix.config.platform == 'macos-latest'
         run: |
             cd target/${{ matrix.config.target }}/release/bundle/osx/
-            zip -r Orbolay-${{ matrix.config.target }}.app.zip Orbolay.app
+            zip -r Lamina-${{ matrix.config.target }}.app.zip Lamina.app
 
       - name: Upload AppImage
         if: matrix.config.platform == 'ubuntu-22.04'
@@ -164,4 +164,4 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: orbolay-${{ matrix.config.target }}.app
-          path: target/${{ matrix.config.target }}/release/bundle/osx/Orbolay-${{ matrix.config.target }}.app.zip
+          path: target/${{ matrix.config.target }}/release/bundle/osx/Lamina-${{ matrix.config.target }}.app.zip

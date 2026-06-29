@@ -4,7 +4,7 @@ use freya::prelude::*;
 use crate::{
   app_state::SharedAppState,
   config::{Config, TransportMode, load_config, save_config},
-  util::colors::{GRAY, MUTED_GRAY, TRANSPARENT, DARKISH_BLUE},
+  util::colors::{DARKISH_BLUE, GRAY, MUTED_GRAY, TRANSPARENT},
 };
 
 #[cfg(not(target_os = "macos"))]
@@ -21,7 +21,7 @@ mod setting;
 mod toggle;
 
 const WIDTH: f32 = 500.;
-const HEIGHT: f32 = 400.;
+const HEIGHT: f32 = 600.;
 
 const TRANSPORT_MODES: &[&str] = &["ipc", "websocket"];
 
@@ -62,7 +62,7 @@ fn configurator_window(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> 
   WindowConfig::new(move || configurator(shared.clone(), redraw_tx.clone()))
     .with_background(DARKISH_BLUE)
     .with_size(WIDTH as f64, HEIGHT as f64)
-    .with_title("Orbolay Configurator")
+    .with_title("Lamina Configurator")
     .with_resizable(true)
 }
 
@@ -71,7 +71,6 @@ fn make_updater(
   redraw_tx: flume::Sender<()>,
   mut local_config: State<Config>,
   update_fn: impl Fn(&mut Config, String) + 'static,
-  
 ) -> EventHandler<SettingChange> {
   EventHandler::new(move |change: SettingChange| {
     if let SettingChange::Value(value) = change {
@@ -132,7 +131,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     .child(SettingRow {
       name: "Connection Mode".into(),
       description: Some(
-        "Set the communication method between Orbolay and Discord. If using an official client, use \"ipc\", otherwise, use \"websocket\"."
+        "Set the communication method between Lamina and Discord. If using an official client, use \"ipc\", otherwise, use \"websocket\"."
           .into(),
       ),
       kind: SettingKind::Dropdown(
@@ -228,6 +227,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       }),
       disabled: false,
     })
+    .child(divider())
     .child(SettingRow {
       name: "Display Voice Members".into(),
       description: Some("Control when and how voice users are visible".into()),
@@ -251,16 +251,6 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     })
     .child(divider())
     .child(SettingRow {
-      name: "Semi-Transparent Notifications".into(),
-      description: Some("Fade notifications when the overlay is closed".into()),
-      kind: SettingKind::Toggle(config.messages_semitransparent),
-      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
-        cfg.messages_semitransparent = v == "true";
-      }),
-      disabled: false,
-    })
-    .child(divider())
-    .child(SettingRow {
       name: "User Row Background".into(),
       description: Some("Background color for voice user rows (hex, e.g. #FF252B32)".into()),
       kind: SettingKind::ColorInput(Some(
@@ -274,9 +264,6 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       }),
       disabled: false,
     })
-    .child(divider());
-
-  let inner = inner
     .child(SettingRow {
       name: "Voice Alignment".into(),
       description: Some("Screen position for voice users".into()),
@@ -315,7 +302,19 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
         }
       }),
       disabled: false,
+    })    
+    .child(SettingRow {
+      name: "Semi-Transparent Notifications".into(),
+      description: Some("Fade notifications when the overlay is closed".into()),
+      kind: SettingKind::Toggle(config.messages_semitransparent),
+      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
+        cfg.messages_semitransparent = v == "true";
+      }),
+      disabled: false,
     })
+    .child(divider());
+
+  let inner = inner
     .child(divider())
     .child(SettingRow {
       name: "Notification Alignment".into(),

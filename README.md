@@ -1,4 +1,4 @@
-# Orbolay Enhanced
+# Lamina
 
 # How to Use
 
@@ -7,6 +7,16 @@
 | Open overlay  | Alt + F12 |   |
 | Close overlay | Q         |   |
 
+## Config directory
+
+```
+C:\Users\Burger\AppData\Roaming\orbolay
+```
+
+### To-do
+
+- Add link to config.json location
+- (?) Add visible tray icon for the app
 
 ---
 

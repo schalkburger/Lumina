@@ -1,6 +1,6 @@
 use sysinfo::{ProcessRefreshKind, RefreshKind, System};
 
-// Check if there is already an orbolay process running
+// Check if there is already an lumina process running
 pub fn is_already_running() -> bool {
   let sys = System::new_with_specifics(
     RefreshKind::nothing().with_processes(ProcessRefreshKind::everything()),
@@ -14,7 +14,7 @@ pub fn is_already_running() -> bool {
       .to_ascii_lowercase()
       .to_str()
       .unwrap_or("")
-      .contains("orbolay")
+      .contains("lumina")
       && proc.pid().as_u32() != pid
     {
       return true;

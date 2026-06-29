@@ -2,6 +2,8 @@ use freya::engine::prelude::SkColor;
 use freya::prelude::*;
 
 use crate::{
+  app_state::SharedAppState,
+  config::save_config,
   user::{User, UserVoiceState},
   util::{
     colors::{self, parse_hex},
@@ -22,8 +24,8 @@ impl Component for AvatarIcon {
   fn render(&self) -> impl IntoElement {
     let (url, border) = avatar_url_and_border(&self.user);
     rect()
-      .width(Size::px(45.))
-      .height(Size::px(45.))
+      .width(Size::px(35.))
+      .height(Size::px(35.))
       .margin(Gaps::new(0., 6., 0., 8.))
       .corner_radius(CornerRadius::new_all(25.))
       .child(
@@ -50,7 +52,6 @@ impl Component for UserLabel {
       .main_align(Alignment::Center)
       .cross_align(Alignment::Center)
       .height(Size::percent(70.))
-      // .background(colors::GRAY)
       .background(colors::TRANSPARENT)
       .corner_radius(CornerRadius::new_all(5.))
       .margin(Gaps::new(0., 6., 0., 6.))
@@ -89,13 +90,25 @@ impl Component for UserLabel {
   }
 }
 
-#[derive(PartialEq)]
 pub struct UserRow {
   pub user: User,
   pub is_right_aligned: bool,
   pub is_open: bool,
   pub is_voice_semitransparent: bool,
   pub background: Option<String>,
+  pub shared: SharedAppState,
+  pub x_mult: i32,
+  pub y_mult: i32,
+}
+
+impl PartialEq for UserRow {
+  fn eq(&self, other: &Self) -> bool {
+    self.user == other.user
+      && self.is_right_aligned == other.is_right_aligned
+      && self.is_open == other.is_open
+      && self.is_voice_semitransparent == other.is_voice_semitransparent
+      && self.background == other.background
+  }
 }
 
 impl Component for UserRow {
@@ -104,7 +117,7 @@ impl Component for UserRow {
     let is_speaking = self.user.voice_state == UserVoiceState::Speaking;
 
     let opacity = if !is_speaking && (self.is_voice_semitransparent && !self.is_open) {
-      0.75
+      0.45
     } else {
       0.90
     };
@@ -116,23 +129,59 @@ impl Component for UserRow {
       user: self.user.clone(),
     };
 
+    let shared_down = self.shared.clone();
+    let shared_move = self.shared.clone();
+    let x_mult = self.x_mult;
+    let y_mult = self.y_mult;
+
+    let drag_state: State<Option<(f64, f64, i32, i32)>> = use_state(|| None);
+    let mut drag_down = drag_state;
+    let drag_move = drag_state;
+    let mut drag_press = drag_state;
+
     let row = rect()
       .direction(Direction::Horizontal)
       .main_align(Alignment::Start)
       .cross_align(Alignment::Center)
-      .width(Size::px(200.))
-      .height(Size::px(60.))
+      .width(Size::px(180.))
+      .height(Size::px(50.))
       .padding(Gaps::new_all(0.3))
-      .margin(Gaps::new(2.0, 0.0, 2.0, 0.))
+      .margin(Gaps::new(2.0, 0.0, 2.0, 2.0))
       .corner_radius(CornerRadius::new_all(6.))
       .background(
         self.background
           .as_deref()
           .and_then(parse_hex)
-          .unwrap_or(colors::DARKISH_BLUE),   
-      )  
+          .unwrap_or(colors::DARKISH_BLUE),
+      )
       .opacity(opacity)
-      .border(Border::new().fill(colors::LIGHT_GRAY).width(1.));
+      .border(Border::new().fill(colors::LIGHT_GRAY).width(1.))
+      .on_pointer_down(move |e: Event<PointerEventData>| {
+        let location = e.global_location();
+        let state = shared_down.read().unwrap();
+        let init_x = state.config.user_offset_x;
+        let init_y = state.config.user_offset_y;
+        drop(state);
+        *drag_down.write() = Some((location.x, location.y, init_x, init_y));
+      })
+      .on_global_pointer_move(move |e: Event<PointerEventData>| {
+        if let Some((start_x, start_y, init_x, init_y)) = *drag_move.read() {
+          let location = e.global_location();
+          let dx = ((location.x - start_x) as i32) * x_mult;
+          let dy = ((location.y - start_y) as i32) * y_mult;
+          let new_x = init_x + dx;
+          let new_y = init_y + dy;
+          let mut state = shared_move.write().unwrap();
+          state.config.user_offset_x = new_x;
+          state.config.user_offset_y = new_y;
+          let config = state.config.clone();
+          drop(state);
+          save_config(&config);
+        }
+      })
+      .on_global_pointer_press(move |_e: Event<PointerEventData>| {
+        *drag_press.write() = None;
+      });
 
     if is_right_aligned {
       row.child(icon).child(label)

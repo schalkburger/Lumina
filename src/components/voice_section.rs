@@ -1,13 +1,13 @@
 use freya::prelude::*;
 
 use crate::{
+  app_state::SharedAppState,
   components::UserRow,
   config::{AxisAlignment, CornerAlignment, DisplayVoiceMembers},
   user::{User, UserVoiceState},
   util::text::censor,
 };
 
-#[derive(PartialEq)]
 pub struct VoiceSection {
   pub voice_users: Vec<User>,
   pub is_open: bool,
@@ -17,6 +17,20 @@ pub struct VoiceSection {
   pub user_offset_y: i32,
   pub display_voice_members: DisplayVoiceMembers,
   pub user_row_background: Option<String>,
+  pub shared: SharedAppState,
+}
+
+impl PartialEq for VoiceSection {
+  fn eq(&self, other: &Self) -> bool {
+    self.voice_users == other.voice_users
+      && self.is_open == other.is_open
+      && self.is_censor == other.is_censor
+      && self.user_alignment == other.user_alignment
+      && self.user_offset_x == other.user_offset_x
+      && self.user_offset_y == other.user_offset_y
+      && self.display_voice_members == other.display_voice_members
+      && self.user_row_background == other.user_row_background
+  }
 }
 
 impl Component for VoiceSection {
@@ -49,6 +63,19 @@ impl Component for VoiceSection {
       .width(Size::fill())
       .padding(gaps);
 
+    let x_mult: i32 = match alignment.x {
+      AxisAlignment::Start => 1,
+      AxisAlignment::End => -1,
+      AxisAlignment::Center => 0,
+    };
+    let y_mult: i32 = match alignment.y {
+      AxisAlignment::Start => 1,
+      AxisAlignment::End => -1,
+      AxisAlignment::Center => 0,
+    };
+
+    let shared = self.shared.clone();
+
     filtered_users.iter().fold(base, |el, user| {
       let mut u = user.clone();
       if self.is_censor {
@@ -63,6 +90,9 @@ impl Component for VoiceSection {
           DisplayVoiceMembers::AlwaysSemiTransparent
         ),
         background: self.user_row_background.clone(),
+        shared: shared.clone(),
+        x_mult,
+        y_mult,
       })
     })
   }

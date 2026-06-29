@@ -216,7 +216,7 @@ impl Default for Config {
 }
 
 pub fn config_dir() -> Option<std::path::PathBuf> {
-  Some(dirs::config_dir()?.join("orbolay"))
+  Some(dirs::config_dir()?.join("lumina"))
 }
 
 pub fn save_config(config: &Config) {

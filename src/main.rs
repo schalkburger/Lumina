@@ -28,7 +28,7 @@ use crate::{
   notifications::create_notification_thread,
   payloads::Notification,
   transport::create_transport_thread,
-  updates::maybe_notify_update,
+  // updates::maybe_notify_update,
   util::{bridge::BridgeMessage, colors},
 };
 
@@ -113,8 +113,8 @@ fn main() {
   if util::process::is_already_running() {
     MessageDialogBuilder::default()
       .set_level(MessageLevel::Error)
-      .set_title("Orbolay")
-      .set_text("Orbolay is already running. Kill the existing process before starting a new one.")
+      .set_title("Lamina")
+      .set_text("Lamina is already running. Kill the existing process before starting a new one.")
       .alert()
       .show()
       .expect("Failed to show message dialog");
@@ -145,7 +145,7 @@ fn main() {
     let session_type = std::env::var("XDG_SESSION_TYPE").unwrap_or_default();
     if session_type.to_lowercase() == "wayland" {
       warn!(
-        "You are using Wayland. Orbolay will probably not work correctly unless running with XWayland."
+        "You are using Wayland. Lamina will probably not work correctly unless running with XWayland."
       );
     }
   }
@@ -161,7 +161,7 @@ fn main() {
       .with_fallback_font("Twemoji")
       .with_window(
         WindowConfig::new(app)
-          .with_title("orbolay")
+          .with_title("lumina")
           .with_decorations(false)
           .with_transparency(true)
           .with_background(Color::TRANSPARENT)
@@ -182,10 +182,10 @@ fn main() {
               use winit::platform::wayland::WindowAttributesExtWayland;
               use winit::platform::x11::{WindowAttributesExtX11, WindowType};
 
-              w = WindowAttributesExtX11::with_name(w, "orbolay", "orbolay")
+              w = WindowAttributesExtX11::with_name(w, "lumina", "lumina")
                 .with_x11_window_type(vec![WindowType::Utility])
                 .with_override_redirect(true);
-              w = WindowAttributesExtWayland::with_name(w, "orbolay", "orbolay");
+              w = WindowAttributesExtWayland::with_name(w, "lumina", "lumina");
             }
 
             w
@@ -229,7 +229,7 @@ fn app() -> impl IntoElement {
 
     shared.write().unwrap().notify(Notification {
       title: format!(
-        "Orbolay Enhanced v{} (rev {})",
+        "Lamina Enhanced v{} (rev {})",
         APP_VERSION.unwrap_or("0.0.0"),
         GIT_HASH.unwrap_or("unknown")
       ),
@@ -273,7 +273,7 @@ fn app() -> impl IntoElement {
     }
 
     start_config_watcher(shared.clone(), redraw_tx.clone());
-    maybe_notify_update(shared.clone());
+    // maybe_notify_update(shared.clone());
 
     // Clone for returning to render scope before they're moved into the keybind handler
     let render_shared = shared.clone();
@@ -372,16 +372,6 @@ fn app() -> impl IntoElement {
           .child(Soundboard { app_state })
       }))
     })
-    // Drag handle (top 40px, only when open)
-    .maybe(is_open, |el| {
-      el.child(
-        rect()
-          .position(Position::new_absolute().top(0.).left(0.))
-          .width(Size::fill())
-          .height(Size::px(40.))
-          .window_drag(),
-      )
-    })
     // Voice users
     .child(VoiceSection {
       voice_users,
@@ -395,6 +385,7 @@ fn app() -> impl IntoElement {
       user_offset_y: config.user_offset_y,
       display_voice_members: config.display_voice_members.clone().unwrap_or_default(),
       user_row_background: config.user_row_background.clone(),
+      shared: shared.clone(),
     })
     // Voice controls (top center)
     .maybe(is_open && current_user.is_some(), |el| {
