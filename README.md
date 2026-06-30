@@ -1,6 +1,6 @@
 # Lumina
 
-![description](docs\lumina-overlay-open.png)
+![description](/docs/lumina-overlay-open.png)
 
 A quick, lightweight, native, and cross-platform alternative to Discord overlay.
 
