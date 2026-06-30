@@ -17,7 +17,7 @@ pub fn start_config_watcher(shared: SharedAppState, redraw_tx: flume::Sender<()>
       Ok(w) => w,
       Err(e) => {
         warn!(
-          "Failed to create config watcher: {}. Config changes will not reflect until Lamina is restarted.",
+          "Failed to create config watcher: {}. Config changes will not reflect until Lumina is restarted.",
           e
         );
         return;
@@ -28,7 +28,7 @@ pub fn start_config_watcher(shared: SharedAppState, redraw_tx: flume::Sender<()>
       Some(path) => path.join("config.json"),
       None => {
         warn!(
-          "Failed to get config path. Config changes will not reflect until Lamina is restarted."
+          "Failed to get config path. Config changes will not reflect until Lumina is restarted."
         );
         return;
       }
@@ -36,7 +36,7 @@ pub fn start_config_watcher(shared: SharedAppState, redraw_tx: flume::Sender<()>
 
     if let Err(e) = watcher.watch(&config_path, notify::RecursiveMode::NonRecursive) {
       warn!(
-        "Failed to watch config file at {:?}: {}. Config changes will not reflect until Lamina is restarted.",
+        "Failed to watch config file at {:?}: {}. Config changes will not reflect until Lumina is restarted.",
         config_path, e
       );
       return;

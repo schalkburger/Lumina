@@ -113,8 +113,8 @@ fn main() {
   if util::process::is_already_running() {
     MessageDialogBuilder::default()
       .set_level(MessageLevel::Error)
-      .set_title("Lamina")
-      .set_text("Lamina is already running. Kill the existing process before starting a new one.")
+      .set_title("Lumina")
+      .set_text("Lumina is already running. Kill the existing process before starting a new one.")
       .alert()
       .show()
       .expect("Failed to show message dialog");
@@ -145,7 +145,7 @@ fn main() {
     let session_type = std::env::var("XDG_SESSION_TYPE").unwrap_or_default();
     if session_type.to_lowercase() == "wayland" {
       warn!(
-        "You are using Wayland. Lamina will probably not work correctly unless running with XWayland."
+        "You are using Wayland. Lumina will probably not work correctly unless running with XWayland."
       );
     }
   }
@@ -162,6 +162,7 @@ fn main() {
       .with_window(
         WindowConfig::new(app)
           .with_title("lumina")
+          .with_icon(LaunchConfig::window_icon(include_bytes!("../assets/discordgrey.png")))
           .with_decorations(false)
           .with_transparency(true)
           .with_background(Color::TRANSPARENT)
@@ -229,7 +230,7 @@ fn app() -> impl IntoElement {
 
     shared.write().unwrap().notify(Notification {
       title: format!(
-        "Lamina v{} (rev {})",
+        "Lumina v{} (rev {})",
         APP_VERSION.unwrap_or("0.0.0"),
         GIT_HASH.unwrap_or("unknown")
       ),

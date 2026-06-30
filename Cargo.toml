@@ -13,7 +13,7 @@ strip = true
 panic = "abort"
 
 [package.metadata.bundle]
-name = "Lamina"
+name = "Lumina"
 identifier = "dev.spikehd.orbolay"
 package-types = ["deb"]
 

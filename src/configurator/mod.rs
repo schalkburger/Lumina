@@ -63,7 +63,7 @@ fn configurator_window(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> 
   WindowConfig::new(move || configurator(shared.clone(), redraw_tx.clone()))
     .with_background(DARKISH_BLUE)
     .with_size(WIDTH as f64, HEIGHT as f64)
-    .with_title("Lamina Settings")
+    .with_title("Lumina Settings")
     .with_resizable(true)
 }
 
@@ -132,7 +132,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     .child(SettingRow {
       name: "Connection Mode".into(),
       description: Some(
-        "Set the communication method between Lamina and Discord. If using an official client, use \"ipc\", otherwise, use \"websocket\"."
+        "Set the communication method between Lumina and Discord. If using an official client, use \"ipc\", otherwise, use \"websocket\"."
           .into(),
       ),
       kind: SettingKind::Dropdown(
@@ -345,7 +345,12 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     .child(SettingRow {
       name: "Messages X Offset (px)".into(),
       description: None,
-      kind: SettingKind::Input(Some(config.message_offset_x.to_string())),
+      kind: SettingKind::Slider {
+        value: config.message_offset_x as f64,
+        min: -200.0,
+        max: 200.0,
+        step: 1.0,
+      },
       on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
         if let Ok(n) = v.trim().parse::<i32>() {
           cfg.message_offset_x = n;
@@ -357,7 +362,12 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     .child(SettingRow {
       name: "Messages Y Offset (px)".into(),
       description: None,
-      kind: SettingKind::Input(Some(config.message_offset_y.to_string())),
+      kind: SettingKind::Slider {
+        value: config.message_offset_y as f64,
+        min: -200.0,
+        max: 200.0,
+        step: 1.0,
+      },
       on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
         if let Ok(n) = v.trim().parse::<i32>() {
           cfg.message_offset_y = n;

@@ -68,7 +68,7 @@ impl Component for UserLabel {
           svg(MUTED_SVG)
             .width(Size::px(16.))
             .height(Size::px(16.))
-            .margin(Gaps::new(0., 6., 0., 0.)),
+            .margin(Gaps::new(0., 6., 0., 2.)),
         )
       })
       .maybe(is_deafened, |el| {
@@ -76,7 +76,7 @@ impl Component for UserLabel {
           svg(DEAFENED_SVG)
             .width(Size::px(16.))
             .height(Size::px(16.))
-            .margin(Gaps::new(0., 6., 0., 0.)),
+            .margin(Gaps::new(0., 6., 0., 2.)),
         )
       })
       .maybe(user.streaming, |el| {
@@ -143,7 +143,7 @@ impl Component for UserRow {
       .direction(Direction::Horizontal)
       .main_align(Alignment::Start)
       .cross_align(Alignment::Center)
-      .width(Size::px(180.))
+      .width(Size::px(200.))
       .height(Size::px(50.))
       .padding(Gaps::new_all(0.3))
       .margin(Gaps::new(2.0, 0.0, 2.0, 2.0))
@@ -155,7 +155,7 @@ impl Component for UserRow {
           .unwrap_or(colors::DARKISH_BLUE),
       )
       .opacity(opacity)
-      .border(Border::new().fill(colors::LIGHT_GRAY).width(1.))
+      .border(Border::new().fill(if is_speaking { colors::GREEN } else { colors::LIGHT_GRAY }).width(1.))
       .on_pointer_down(move |e: Event<PointerEventData>| {
         let location = e.global_location();
         let state = shared_down.read().unwrap();
