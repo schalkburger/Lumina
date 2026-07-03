@@ -4,7 +4,7 @@ use freya::prelude::*;
 use crate::{
   app_state::SharedAppState,
   config::{Config, TransportMode, load_config, save_config},
-  util::colors::{self, DARKISH_BLUE, GRAY, MUTED_GRAY, LIGHT_GRAY, SUPERLIGHT_GRAY, DARKER_GRAY},
+  util::colors::{self, DARKISH_BLUE, GRAY, LIGHT_GRAY, SUPERLIGHT_GRAY},
 };
 
 #[cfg(not(target_os = "macos"))]
@@ -64,6 +64,7 @@ fn configurator_window(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> 
     .with_background(DARKISH_BLUE)
     .with_size(WIDTH as f64, HEIGHT as f64)
     .with_title("Lumina Settings")
+    .with_icon(LaunchConfig::window_icon(include_bytes!("../../assets/lumina.png")))
     .with_resizable(true)
 }
 

@@ -58,7 +58,7 @@ impl Component for UserLabel {
       .child(
         rect().padding(Gaps::new_all(4.)).child(
           label()
-            .font_size(14.)
+            .font_size(12.)
             .color(Color::WHITE)
             .text(user.name.clone()),
         ),
@@ -146,8 +146,11 @@ impl Component for UserRow {
       .width(Size::px(200.))
       .height(Size::px(50.))
       .padding(Gaps::new_all(0.3))
+      // .padding(Gaps::new_all(0.0))
       .margin(Gaps::new(2.0, 0.0, 2.0, 2.0))
+      // .margin(Gaps::new(0.0, 0.0, 0.0, 0.0))
       .corner_radius(CornerRadius::new_all(6.))
+      // .corner_radius(CornerRadius::new_all(2.))
       .background(
         self.background
           .as_deref()

@@ -12,8 +12,8 @@ pub const DEFAULT_OVERLAY_TOGGLE: LazyCell<Vec<String>> =
   LazyCell::new(|| vec!["CtrlLeft".into(), "ShiftLeft".into(), "KeyO".into()]);
 
 pub const DEFAULT_QUIT: LazyCell<Vec<String>> =
-  // LazyCell::new(|| vec!["ControlLeft".into(), "KeyQ".into()]);
-  LazyCell::new(|| vec!["KeyQ".into()]);
+  LazyCell::new(|| vec!["ControlLeft".into(), "KeyQ".into()]);
+  // LazyCell::new(|| vec!["KeyQ".into()]);
   
 
 pub struct Keybind {

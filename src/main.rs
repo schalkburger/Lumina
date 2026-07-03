@@ -162,7 +162,7 @@ fn main() {
       .with_window(
         WindowConfig::new(app)
           .with_title("lumina")
-          .with_icon(LaunchConfig::window_icon(include_bytes!("../assets/discordgrey.png")))
+          .with_icon(LaunchConfig::window_icon(include_bytes!("../assets/lumina.png")))
           .with_decorations(false)
           .with_transparency(true)
           .with_background(Color::TRANSPARENT)
@@ -237,7 +237,7 @@ fn app() -> impl IntoElement {
       body: String::new(),
       icon: String::new(),
       timestamp: Some(chrono::Utc::now().timestamp()),
-      timeout_secs: 4,
+      timeout_secs: 5,
       guild_id: None,
       channel_id: None,
       message_id: None,
