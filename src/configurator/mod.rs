@@ -4,7 +4,7 @@ use freya::prelude::*;
 use crate::{
   app_state::SharedAppState,
   config::{Config, TransportMode, load_config, save_config},
-  util::colors::{self, DARKISH_BLUE, DARKER_GRAY, LIGHT_GRAY, SUPERLIGHT_GRAY, GRAY},
+  util::colors::{self, DARKISH_BLUE, LIGHT_GRAY, SUPERLIGHT_GRAY, GRAY},
 };
 
 #[cfg(not(target_os = "macos"))]
