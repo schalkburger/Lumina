@@ -416,6 +416,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     .height(Size::fill())
     .background(GRAY)
     .direction(Direction::Vertical)
+    .font_size(14.)
     .child(
       ScrollView::new()
         .height(Size::fill())
