@@ -42,8 +42,8 @@ impl From<String> for TransportMode {
 impl Display for DisplayVoiceMembers {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
-      DisplayVoiceMembers::Always => write!(f, "always"),
-      DisplayVoiceMembers::AlwaysSemiTransparent => write!(f, "always (semi-transparent)"),
+      DisplayVoiceMembers::Always => write!(f, "always (opaque)"),
+      DisplayVoiceMembers::AlwaysSemiTransparent => write!(f, "always (transparent)"),
       DisplayVoiceMembers::WhenSpeaking => write!(f, "only when speaking"),
     }
   }
@@ -52,8 +52,8 @@ impl Display for DisplayVoiceMembers {
 impl From<String> for DisplayVoiceMembers {
   fn from(value: String) -> Self {
     match value.as_ref() {
-      "always" => DisplayVoiceMembers::Always,
-      "always (semi-transparent)" => DisplayVoiceMembers::AlwaysSemiTransparent,
+      "always (opaque)" => DisplayVoiceMembers::Always,
+      "always (transparent)" => DisplayVoiceMembers::AlwaysSemiTransparent,
       "only when speaking" => DisplayVoiceMembers::WhenSpeaking,
       _ => DisplayVoiceMembers::Always,
     }

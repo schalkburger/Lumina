@@ -4,7 +4,7 @@ use freya::prelude::*;
 use crate::{
   app_state::SharedAppState,
   config::{Config, TransportMode, load_config, save_config},
-  util::colors::{self, DARKISH_BLUE, GRAY, LIGHT_GRAY, SUPERLIGHT_GRAY},
+  util::colors::{self, DARKISH_BLUE, DARKER_GRAY, LIGHT_GRAY, SUPERLIGHT_GRAY, GRAY},
 };
 
 #[cfg(not(target_os = "macos"))]
@@ -21,7 +21,7 @@ mod setting;
 mod slider;
 mod toggle;
 
-const WIDTH: f32 = 450.;
+const WIDTH: f32 = 500.;
 const HEIGHT: f32 = 600.;
 
 const TRANSPORT_MODES: &[&str] = &["ipc", "websocket"];

@@ -159,6 +159,27 @@ fn main() {
     LaunchConfig::new()
       .with_font("Twemoji", TWEMOJI_FONT)
       .with_fallback_font("Twemoji")
+      .with_tray(
+        || {
+          use freya::tray::menu::{Menu, MenuItemBuilder};
+          let quit_item = MenuItemBuilder::new().text("Quit").build();
+          let menu = Menu::new();
+          menu.append(&quit_item).unwrap();
+          freya::tray::TrayIconBuilder::new()
+            .with_icon(LaunchConfig::tray_icon(include_bytes!("../assets/lumina.png")))
+            .with_tooltip("Lumina")
+            .with_menu(Box::new(menu))
+            .build()
+            .unwrap()
+        },
+        |event, _ctx| {
+          if let freya::tray::TrayEvent::Menu(ref menu_event) = event {
+            if menu_event.id == "Quit" {
+              std::process::exit(0);
+            }
+          }
+        },
+      )
       .with_window(
         WindowConfig::new(app)
           .with_title("lumina")
