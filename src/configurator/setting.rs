@@ -96,7 +96,7 @@ impl Component for SettingRow {
           .main_align(Alignment::SpaceBetween)
           .cross_align(Alignment::Center)
           .width(Size::fill())
-          .child(label().text(name).color(Color::WHITE).font_size(14.))
+          .child(label().text(name).color(Color::WHITE).font_size(12.))
           .map(toggle_initial, move |el, initial| {
             el.child(ToggleControl::new(
               initial,

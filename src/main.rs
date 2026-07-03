@@ -162,8 +162,10 @@ fn main() {
       .with_tray(
         || {
           use freya::tray::menu::{Menu, MenuItemBuilder};
-          let quit_item = MenuItemBuilder::new().text("Quit").build();
+          let settings_item = MenuItemBuilder::new().id("Settings".into()).text("Settings").enabled(true).build();
+          let quit_item = MenuItemBuilder::new().id("Quit".into()).text("Quit").enabled(true).build();
           let menu = Menu::new();
+          menu.append(&settings_item).unwrap();
           menu.append(&quit_item).unwrap();
           freya::tray::TrayIconBuilder::new()
             .with_icon(LaunchConfig::tray_icon(include_bytes!("../assets/lumina.png")))
@@ -172,9 +174,16 @@ fn main() {
             .build()
             .unwrap()
         },
-        |event, _ctx| {
+        |event, mut ctx| {
           if let freya::tray::TrayEvent::Menu(ref menu_event) = event {
-            if menu_event.id == "Quit" {
+            if menu_event.id == "Settings" {
+              ctx.launch_window(
+                configurator::configurator_window(
+                  SharedAppState::default(),
+                  flume::unbounded().0,
+                ),
+              );
+            } else if menu_event.id == "Quit" {
               std::process::exit(0);
             }
           }

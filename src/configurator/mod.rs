@@ -59,7 +59,7 @@ pub fn open_configurator_standalone() {
   launch(LaunchConfig::new().with_window(configurator_window(shared.clone(), redraw_tx)));
 }
 
-fn configurator_window(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> WindowConfig {
+pub fn configurator_window(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> WindowConfig {
   WindowConfig::new(move || configurator(shared.clone(), redraw_tx.clone()))
     .with_background(DARKISH_BLUE)
     .with_size(WIDTH as f64, HEIGHT as f64)

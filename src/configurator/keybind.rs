@@ -176,6 +176,6 @@ impl Component for KeybindControl {
       .height(Size::px(32.0))
       .main_align(Alignment::Center)
       .cross_align(Alignment::Start)
-      .child(label().color(text_color).font_size(14.0).text(display_text))
+      .child(label().color(text_color).font_size(12.0).text(display_text))
   }
 }

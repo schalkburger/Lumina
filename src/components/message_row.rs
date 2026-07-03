@@ -67,7 +67,7 @@ impl Component for MessageRow {
           .width(Size::fill())
           .child(
             label()
-              .font_size(14.)
+              .font_size(12.)
               .font_weight(FontWeight::BOLD)
               .color(Color::WHITE)
               .margin(Gaps::new(0., 0., 4., 0.))
