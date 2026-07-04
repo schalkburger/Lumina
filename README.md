@@ -1,14 +1,25 @@
 # Lumina
 
-![description](/docs/lumina-overlay-open.png)
+![description](/docs/lumina-overlay-open.png)    
 
-A quick, lightweight, native, and cross-platform alternative to Discord overlay.
+Quick, small, native, multi-platform Discord overlay alternative, with some enhancements.
+
+This is a fork of [Orbolay](https://github.com/SpikeHD/Orbolay).
 
 ---
 
+# Features
+
+* Voice channel member list and status (who is speaking/muted/deafened/etc)
+* Custom notifications
+* Mute/deafen/disconnect controls
+* Soundboard buttons
+* Customizable layout, colors, border radius, etc.
+
 # Installation
 
-TO-DO
+1. Download the latest [release](https://github.com/schalkburger/Lumina/releases)
+2. Run the executable
 
 # How to Use
 

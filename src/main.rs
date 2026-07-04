@@ -260,9 +260,8 @@ fn app() -> impl IntoElement {
 
     shared.write().unwrap().notify(Notification {
       title: format!(
-        "Lumina v{} (rev {})",
+        "Lumina v{}",
         APP_VERSION.unwrap_or("0.0.0"),
-        GIT_HASH.unwrap_or("unknown")
       ),
       body: String::new(),
       icon: String::new(),
