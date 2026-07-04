@@ -8,10 +8,10 @@ use rdev::Key;
 use super::event::KeyEvent;
 
 pub const DEFAULT_OVERLAY_TOGGLE: LazyCell<Vec<String>> =
-  LazyCell::new(|| vec!["ControlLeft".into(), "KeyO".into()]);
+  LazyCell::new(|| vec!["ShiftLeft".into(), "BackQuote".into()]);
 
 pub const DEFAULT_QUIT: LazyCell<Vec<String>> =
-  LazyCell::new(|| vec!["ControlLeft".into(), "KeyQ".into()]);
+  LazyCell::new(|| vec!["ShiftLeft".into(), "KeyQ".into()]);
 
 pub struct Keybind {
   pub keys: Vec<Key>,

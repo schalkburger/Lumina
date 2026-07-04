@@ -4,7 +4,7 @@ use freya::prelude::*;
 use crate::{
   app_state::SharedAppState,
   config::{Config, TransportMode, load_config, save_config},
-  util::colors::{self, DARKISH_BLUE, LIGHT_GRAY, SUPERLIGHT_GRAY, GRAY},
+  util::colors::{self, DARKISH_BLUE, LIGHT_GRAY, SUPERLIGHT_GRAY, GRAY, GREEN, DARKER_GRAY},
 };
 
 #[cfg(not(target_os = "macos"))]
@@ -38,7 +38,7 @@ const ALIGNMENTS: &[&str] = &[
 ];
 
 const VOICE_DISPLAY_OPTIONS: &[&str] =
-  &["always", "always (semi-transparent)", "only when speaking"];
+  &["always (opaque)", "always (transparent)", "only when speaking"];
 
 pub fn open_configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) {
   spawn(async move {
@@ -266,6 +266,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       }),
       disabled: false,
     })
+    .child(divider())
     .child(SettingRow {
       name: "Voice Alignment".into(),
       description: Some("Screen position for voice users".into()),
@@ -385,7 +386,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       rect()
         .width(Size::fill())
         .padding(Gaps::new(10., 12., 10., 12.))
-        .margin(Gaps::new(10., 0., 10., 0.))
+        .margin(Gaps::new(20., 0., 20., 0.))
         .background(colors::DARKER_GRAY)
         .corner_radius(CornerRadius::new_all(4.))
         .on_press(move |_| {

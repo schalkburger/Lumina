@@ -209,7 +209,7 @@ impl Default for Config {
       is_keybind_enabled: None,
       transport_mode: TransportMode::Ipc,
       software_rendering: None,
-      user_row_background: Some("#FF252B32".into()),
+      user_row_background: Some("#252B32".into()),
       window_position: None,
     }
   }

@@ -14,8 +14,8 @@ TO-DO
 
 | Action  | Default Keybind |   
 |---------------|-----------|
-| Open overlay  | CTRL + SHIFT + O |
-| Close overlay | Q         |
+| Open overlay  | Left Shift + ` |
+| Close overlay | Left Shift + Q         |
 
 ## Config directory
 

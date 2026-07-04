@@ -117,9 +117,9 @@ impl Component for UserRow {
     let is_speaking = self.user.voice_state == UserVoiceState::Speaking;
 
     let opacity = if !is_speaking && (self.is_voice_semitransparent && !self.is_open) {
-      0.75
+      0.5
     } else {
-      0.90
+      1.0
     };
 
     let label = UserLabel {
@@ -158,7 +158,7 @@ impl Component for UserRow {
           .unwrap_or(colors::DARKISH_BLUE),
       )
       .opacity(opacity)
-      .border(Border::new().fill(if is_speaking { colors::GREEN } else { colors::LIGHT_GRAY }).width(1.))
+      .border(Border::new().fill(if is_speaking { colors::GREEN } else { colors::TRANSPARENT_GRAY }).width(1.))
       .on_pointer_down(move |e: Event<PointerEventData>| {
         let location = e.global_location();
         let state = shared_down.read().unwrap();
