@@ -47,7 +47,8 @@ impl Component for SliderControl {
     rect()
       .direction(Direction::Horizontal)
       .cross_align(Alignment::Center)
-      .width(Size::fill())
+      // .width(Size::fill())
+      .width(Size::percent(60.))
       .child(
         label()
           .text(format!("{:.0}", self.value))
@@ -55,7 +56,9 @@ impl Component for SliderControl {
           .font_size(12.)
           .width(Size::px(35.))
           .text_align(TextAlign::Left)
-          .margin(Gaps::new(0., 0., 0., 8.)),
+          .line_height(1.0)
+          .padding(Gaps::new(0., 8., 0., 8.))
+          .margin(Gaps::new(0., 8., 4., 8.)),
       )
       .child(Slider::new(on_moved).value(percentage))
   }

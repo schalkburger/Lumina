@@ -323,11 +323,9 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
         cfg.messages_semitransparent = v == "true";
       }),
       disabled: false,
-    })
-    .child(divider());
+    });
 
   let inner = inner
-    .child(divider())
     .child(SettingRow {
       name: "Notification Alignment".into(),
       description: Some("Screen position for notifications".into()),
@@ -349,7 +347,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       description: None,
       kind: SettingKind::Slider {
         value: config.message_offset_x as f64,
-        min: -200.0,
+        min: 0.0,
         max: 200.0,
         step: 1.0,
       },
@@ -360,13 +358,12 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
       }),
       disabled: false,
     })
-    .child(divider())
     .child(SettingRow {
       name: "Messages Y Offset (px)".into(),
       description: None,
       kind: SettingKind::Slider {
         value: config.message_offset_y as f64,
-        min: -200.0,
+        min: 50.0,
         max: 200.0,
         step: 1.0,
       },

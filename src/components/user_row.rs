@@ -36,10 +36,16 @@ impl Component for AvatarIcon {
   }
 }
 
-#[derive(PartialEq)]
 struct UserLabel {
   user: User,
   background: Option<String>,
+  is_speaking: bool,
+}
+
+impl PartialEq for UserLabel {
+  fn eq(&self, other: &Self) -> bool {
+    self.user == other.user && self.background == other.background && self.is_speaking == other.is_speaking
+  }
 }
 
 impl Component for UserLabel {
@@ -62,6 +68,7 @@ impl Component for UserLabel {
       )
       .corner_radius(CornerRadius::new_all(8.))
       .margin(Gaps::new(0., 6., 0., 6.))
+      .border(Border::new().fill(if self.is_speaking { colors::GREEN } else { colors::TRANSPARENT }).width(1.))
       .child(
         rect().padding(Gaps::new_all(4.)).child(
           label()
@@ -134,6 +141,7 @@ impl Component for UserRow {
     let label = UserLabel {
       user: self.user.clone(),
       background: self.background.clone(),
+      is_speaking,
     };
     let icon = AvatarIcon {
       user: self.user.clone(),
@@ -161,7 +169,6 @@ impl Component for UserRow {
       .corner_radius(CornerRadius::new_all(6.))
       .background(colors::TRANSPARENT)
       .opacity(opacity)
-      .border(Border::new().fill(if is_speaking { colors::GREEN } else { colors::TRANSPARENT }).width(1.))
       .on_pointer_down(move |e: Event<PointerEventData>| {
         let location = e.global_location();
         let state = shared_down.read().unwrap();
