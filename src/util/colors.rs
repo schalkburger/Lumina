@@ -27,3 +27,13 @@ pub fn parse_hex(hex: &str) -> Option<Color> {
     _ => None,
   }
 }
+
+pub fn to_argb_hex(c: Color) -> String {
+  format!(
+    "#{:02X}{:02X}{:02X}{:02X}",
+    c.a() as u32,
+    c.r() as u32,
+    c.g() as u32,
+    c.b() as u32,
+  )
+}

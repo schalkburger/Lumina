@@ -91,12 +91,14 @@ impl Component for SettingRow {
       .padding(Gaps::new(10., 12., 10., 12.))
       .opacity(if self.disabled { 0.4 } else { 1.0 })
       .child({
+        let is_color = matches!(&self.kind, SettingKind::ColorInput(_));
+
         let control = rect()
-          .direction(Direction::Horizontal)
-          .main_align(Alignment::SpaceBetween)
-          .cross_align(Alignment::Center)
+          .direction(if is_color { Direction::Vertical } else { Direction::Horizontal })
+          .main_align(if is_color { Alignment::SpaceAround } else { Alignment::SpaceBetween })
+          .cross_align(if is_color { Alignment::Start } else { Alignment::Center })
           .width(Size::fill())
-          .child(label().text(name).color(Color::WHITE).font_size(12.))
+          .child(label().text(name).color(Color::WHITE).font_size(12.).padding(Gaps::new(0., 0., 8., 0.)).margin(Gaps::new(0., 0., 8., 0.)))
           .map(toggle_initial, move |el, initial| {
             el.child(ToggleControl::new(
               initial,
@@ -116,12 +118,6 @@ impl Component for SettingRow {
               EventHandler::new(move |v: String| oc_input.call(SettingChange::Value(v))),
             ))
           })
-          .map(color_initial, move |el, initial| {
-            el.child(ColorInputControl::new(
-              initial,
-              EventHandler::new(move |v: String| oc_color.call(SettingChange::Value(v))),
-            ))
-          })
           .map(slider_data, move |el, (value, min, max, step)| {
             el.child(SliderControl::new(
               value,
@@ -130,6 +126,13 @@ impl Component for SettingRow {
               step,
               EventHandler::new(move |v: String| oc_slider.call(SettingChange::Value(v))),
             ))
+          })
+          .map(color_initial, move |el, initial| {
+            el.margin(Gaps::new(0., 0., 4., 0.))
+              .child(ColorInputControl::new(
+                initial,
+                EventHandler::new(move |v: String| oc_color.call(SettingChange::Value(v))),
+              ))
           });
 
         #[cfg(not(target_os = "macos"))]

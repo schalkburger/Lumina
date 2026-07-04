@@ -1,6 +1,6 @@
 use freya::prelude::*;
 
-use crate::util::colors::{parse_hex, TRANSPARENT};
+use crate::util::colors::{parse_hex, to_argb_hex, TRANSPARENT};
 
 #[derive(PartialEq)]
 pub struct ColorInputControl {
@@ -16,30 +16,20 @@ impl ColorInputControl {
 
 impl Component for ColorInputControl {
   fn render(&self) -> impl IntoElement {
-    let id = use_a11y();
-    let focus_status = use_focus(id);
     let on_change = self.on_change.clone();
-    let value = use_state(|| self.initial.clone().unwrap_or_default());
+    let initial_color = self
+      .initial
+      .as_deref()
+      .and_then(parse_hex)
+      .unwrap_or(TRANSPARENT);
+    let mut color = use_state(|| initial_color);
 
-    let swatch_color = parse_hex(&value.read()).unwrap_or(TRANSPARENT);
-
-    use_side_effect(move || {
-      if !focus_status.read().is_focused() {
-        on_change.call(value.read().clone());
-      }
-    });
-
-    rect()
-      .direction(Direction::Horizontal)
-      .cross_align(Alignment::Center)
-      .child(
-        rect()
-          .width(Size::px(20.))
-          .height(Size::px(20.))
-          .corner_radius(CornerRadius::new_all(4.))
-          .background(swatch_color)
-          .margin(Gaps::new(0., 6., 0., 0.)),
-      )
-      .child(Input::new(value).a11y_id(id).width(Size::px(100.)))
+    let current = color();
+    ColorPicker::new(move |c| {
+      color.set(c);
+      on_change.call(to_argb_hex(c));
+    })
+    .value(current)
+    .width(Size::px(180.))
   }
 }
