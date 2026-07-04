@@ -7,7 +7,7 @@ Quick, small, native, multi-platform Discord overlay alternative, with some enha
 This is a fork of [Orbolay](https://github.com/SpikeHD/Orbolay) with additional features and customization options.
 
 ---
-E:\GitHub\Orbolay-enhanced\docs\lumina-preview.png
+
 ## Features
 
 * Voice channel member list and status (who is speaking/muted/deafened/etc)
