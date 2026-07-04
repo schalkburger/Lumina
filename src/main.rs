@@ -391,8 +391,8 @@ fn app() -> impl IntoElement {
       )
     })
     // Soundboard popup
-    .maybe(*soundboard_open.read(), |el| {
-      el.maybe_child(current_user.clone().map(|_user| {
+    .maybe(current_user.is_some(), |el| {
+      el.child(
         rect()
           .position(Position::new_absolute().top(0.).left(0.))
           .direction(Direction::Vertical)
@@ -400,8 +400,9 @@ fn app() -> impl IntoElement {
           .cross_align(Alignment::Center)
           .height(Size::percent(90.))
           .width(Size::fill())
-          .child(Soundboard { app_state })
-      }))
+          .opacity(if *soundboard_open.read() { 1.0 } else { 0.0 })
+          .child(Soundboard { app_state }),
+      )
     })
     // Voice users
     .child(VoiceSection {

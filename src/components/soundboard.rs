@@ -159,6 +159,42 @@ impl Component for Soundboard {
             .text("No sounds available"),
         )
     } else {
+      let mut scroll_y = use_state(|| 0_f32);
+
+      let content = guilds.into_iter().fold(
+        rect()
+          .direction(Direction::Vertical)
+          .width(Size::fill())
+          .padding(Gaps::new_all(8.)),
+        |col, (guild_name, guild_sounds)| {
+          let label = if guild_name.is_empty() {
+            "Default".to_string()
+          } else {
+            guild_names.get(&guild_name).cloned().unwrap_or(guild_name)
+          };
+          col.child(GuildLabel { name: label }).child(
+            guild_sounds.into_iter().fold(
+              rect()
+                .direction(Direction::Horizontal)
+                .content(Content::wrap())
+                .width(Size::fill())
+                .padding(Gaps::new(2., 0., 6., 0.)),
+              |row, mut sound| {
+                if let Some(guild_id) = &sound.guild_id
+                  && !app_state.read().premium_type.has_nitro()
+                  && guild_id != &"0".to_string()
+                  && guild_id != &app_state.read().current_guild_id
+                {
+                  sound.available = false;
+                }
+
+                row.child(SoundButton { sound, app_state })
+              },
+            ),
+          )
+        },
+      );
+
       rect()
         .direction(Direction::Vertical)
         .background(colors::GRAY)
@@ -166,45 +202,16 @@ impl Component for Soundboard {
         .max_width(Size::px(400.))
         .height(Size::px(220.))
         .margin(Gaps::new(0., 0., 8., 0.))
+        .overflow(Overflow::Clip)
+        .on_wheel(move |e: Event<WheelEventData>| {
+          let delta = e.delta_y as f32;
+          let new_y = (*scroll_y.read() + delta).min(0.).max(-500.);
+          scroll_y.set(new_y);
+        })
         .child(
-          ScrollView::new()
-            .width(Size::fill())
-            .height(Size::fill())
-            .child(
-              guilds.into_iter().fold(
-                rect()
-                  .direction(Direction::Vertical)
-                  .width(Size::fill())
-                  .padding(Gaps::new_all(8.)),
-                |col, (guild_name, guild_sounds)| {
-                  let label = if guild_name.is_empty() {
-                    "Default".to_string()
-                  } else {
-                    guild_names.get(&guild_name).cloned().unwrap_or(guild_name)
-                  };
-                  col.child(GuildLabel { name: label }).child(
-                    guild_sounds.into_iter().fold(
-                      rect()
-                        .direction(Direction::Horizontal)
-                        .content(Content::wrap())
-                        .width(Size::fill())
-                        .padding(Gaps::new(2., 0., 6., 0.)),
-                      |row, mut sound| {
-                        if let Some(guild_id) = &sound.guild_id
-                          && !app_state.read().premium_type.has_nitro()
-                          && guild_id != &"0".to_string()
-                          && guild_id != &app_state.read().current_guild_id
-                        {
-                          sound.available = false;
-                        }
-
-                        row.child(SoundButton { sound, app_state })
-                      },
-                    ),
-                  )
-                },
-              ),
-            ),
+          rect()
+            .offset_y(*scroll_y.read())
+            .child(content),
         )
     }
   }
