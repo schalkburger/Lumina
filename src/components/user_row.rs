@@ -39,6 +39,7 @@ impl Component for AvatarIcon {
 #[derive(PartialEq)]
 struct UserLabel {
   user: User,
+  background: Option<String>,
 }
 
 impl Component for UserLabel {
@@ -52,14 +53,22 @@ impl Component for UserLabel {
       .main_align(Alignment::Center)
       .cross_align(Alignment::Center)
       .height(Size::percent(70.))
-      .background(colors::TRANSPARENT)
-      .corner_radius(CornerRadius::new_all(5.))
+      .background(
+        self
+          .background
+          .as_deref()
+          .and_then(parse_hex)
+          .unwrap_or(colors::DARKISH_BLUE),
+      )
+      .corner_radius(CornerRadius::new_all(8.))
       .margin(Gaps::new(0., 6., 0., 6.))
       .child(
         rect().padding(Gaps::new_all(4.)).child(
           label()
             .font_size(12.)
             .color(Color::WHITE)
+            .padding(Gaps::new(10., 12., 10., 12.))
+            .margin(Gaps::new(0., 6., 0., 6.))
             .text(user.name.clone()),
         ),
       )
@@ -124,6 +133,7 @@ impl Component for UserRow {
 
     let label = UserLabel {
       user: self.user.clone(),
+      background: self.background.clone(),
     };
     let icon = AvatarIcon {
       user: self.user.clone(),
@@ -141,24 +151,17 @@ impl Component for UserRow {
 
     let row = rect()
       .direction(Direction::Horizontal)
-      .main_align(Alignment::Start)
+      .main_align(if is_right_aligned { Alignment::End } else { Alignment::Start })
       .cross_align(Alignment::Center)
-      .width(Size::px(200.))
+      // .width(Size::px(200.))
+       .width(Size::fill())
       .height(Size::px(50.))
       .padding(Gaps::new_all(0.3))
-      // .padding(Gaps::new_all(0.0))
       .margin(Gaps::new(2.0, 0.0, 2.0, 2.0))
-      // .margin(Gaps::new(0.0, 0.0, 0.0, 0.0))
       .corner_radius(CornerRadius::new_all(6.))
-      // .corner_radius(CornerRadius::new_all(2.))
-      .background(
-        self.background
-          .as_deref()
-          .and_then(parse_hex)
-          .unwrap_or(colors::DARKISH_BLUE),
-      )
+      .background(colors::TRANSPARENT)
       .opacity(opacity)
-      .border(Border::new().fill(if is_speaking { colors::GREEN } else { colors::TRANSPARENT_GRAY }).width(1.))
+      .border(Border::new().fill(if is_speaking { colors::GREEN } else { colors::TRANSPARENT }).width(1.))
       .on_pointer_down(move |e: Event<PointerEventData>| {
         let location = e.global_location();
         let state = shared_down.read().unwrap();
@@ -187,7 +190,7 @@ impl Component for UserRow {
       });
 
     if is_right_aligned {
-      row.child(icon).child(label)
+      row.child(label).child(icon)
     } else {
       row.child(icon).child(label)
     }
