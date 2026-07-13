@@ -34,7 +34,7 @@ This is a fork of [Orbolay](https://github.com/SpikeHD/Orbolay) with additional 
 |---------------------|---------------------|
 | Open/close overlay  | Left Shift + `      |
 | Quit                | Left Shift + Q      |
-| Open configurator   | Ctrl + `            |
+| Open configurator   | C                   |
 
 ## Configuration
 

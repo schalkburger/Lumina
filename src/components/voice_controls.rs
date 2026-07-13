@@ -108,7 +108,7 @@ impl Component for VoiceControls {
       .height(Size::auto())
       .max_height(Size::px(40.))
       .max_width(Size::px(300.))
-      .background(colors::GRAY)
+      .background(colors::DARKER_GRAY)
       .corner_radius(CornerRadius::new_all(8.))
       .child(ControlButton {
         icon: if is_muted || is_deafened {

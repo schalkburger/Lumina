@@ -322,7 +322,6 @@ fn app() -> impl IntoElement {
           }
           keys::KeyEvent::OpenConfigurator if app_state.read().is_open => {
             open_configurator(shared.clone(), redraw_tx.clone());
-            app_state.write().is_open = false;
           }
           keys::KeyEvent::OpenConfigurator => {}
           keys::KeyEvent::Quit => {

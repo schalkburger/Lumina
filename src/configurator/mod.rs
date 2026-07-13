@@ -66,6 +66,7 @@ pub fn configurator_window(shared: SharedAppState, redraw_tx: flume::Sender<()>)
     .with_title("Lumina Settings")
     .with_icon(LaunchConfig::window_icon(include_bytes!("../../assets/lumina.png")))
     .with_resizable(true)
+    .with_window_attributes(|attrs, _el| attrs.with_window_level(winit::window::WindowLevel::AlwaysOnTop))
 }
 
 fn make_updater(
@@ -129,35 +130,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
   let inner = rect()
     .direction(Direction::Vertical)
     .width(Size::fill())
-    .padding(Gaps::new_symmetric(0., 16.))
-    .child(SettingRow {
-      name: "Connection Mode".into(),
-      description: Some(
-        "Set the communication method between Lumina and Discord. If using an official client, use \"ipc\", otherwise, use \"websocket\"."
-          .into(),
-      ),
-      kind: SettingKind::Dropdown(
-        TRANSPORT_MODES.iter().map(|s| s.to_string()).collect(),
-        Some(config.transport_mode.to_string()),
-      ),
-      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
-        cfg.transport_mode = v.into();
-      }),
-      disabled: false,
-    })
-    .child(divider())
-    .child(SettingRow {
-      name: "Websocket Port".into(),
-      description: Some("Port the websocket server listens on (websocket mode only). REQUIRES RESTART.".into()),
-      kind: SettingKind::Input(Some(config.port.unwrap_or(6888).to_string())),
-      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
-        if let Ok(n) = v.trim().parse::<u16>() {
-          cfg.port = Some(n);
-        }
-      }),
-      disabled: config.transport_mode != TransportMode::Websocket,
-    })
-    .child(divider());
+    .padding(Gaps::new_symmetric(0., 16.));
 
   #[cfg(not(target_os = "macos"))]
   let inner = inner
@@ -386,6 +359,34 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
         }
       }),
       disabled: false,
+    })
+    .child(divider())
+    .child(SettingRow {
+      name: "Connection Mode".into(),
+      description: Some(
+        "Set the communication method between Lumina and Discord. If using an official client, use \"ipc\", otherwise, use \"websocket\"."
+          .into(),
+      ),
+      kind: SettingKind::Dropdown(
+        TRANSPORT_MODES.iter().map(|s| s.to_string()).collect(),
+        Some(config.transport_mode.to_string()),
+      ),
+      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
+        cfg.transport_mode = v.into();
+      }),
+      disabled: false,
+    })
+    .child(divider())
+    .child(SettingRow {
+      name: "Websocket Port".into(),
+      description: Some("Port the websocket server listens on (websocket mode only). REQUIRES RESTART.".into()),
+      kind: SettingKind::Input(Some(config.port.unwrap_or(6888).to_string())),
+      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
+        if let Ok(n) = v.trim().parse::<u16>() {
+          cfg.port = Some(n);
+        }
+      }),
+      disabled: config.transport_mode != TransportMode::Websocket,
     })
     .child(divider())
     .child({
