@@ -189,6 +189,8 @@ pub struct Config {
   pub user_row_background: Option<String>,
   #[serde(default)]
   pub window_position: Option<(i32, i32)>,
+  #[serde(default)]
+  pub controls_position: Option<String>,
 }
 
 impl Default for Config {
@@ -211,6 +213,7 @@ impl Default for Config {
       software_rendering: None,
       user_row_background: Some("#252B32".into()),
       window_position: None,
+      controls_position: Some("top".into()),
     }
   }
 }

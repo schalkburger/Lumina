@@ -266,7 +266,7 @@ fn app() -> impl IntoElement {
       body: String::new(),
       icon: String::new(),
       timestamp: Some(chrono::Utc::now().timestamp()),
-      timeout_secs: 5,
+      timeout_secs: 3,
       guild_id: None,
       channel_id: None,
       message_id: None,
@@ -420,9 +420,18 @@ fn app() -> impl IntoElement {
     })
     // Voice controls (top center)
     .maybe(is_open && current_user.is_some(), |el| {
+      let controls_y = config
+        .controls_position
+        .as_deref()
+        .unwrap_or("top");
+      let pos = if controls_y == "bottom" {
+        Position::new_absolute().bottom(50.).left(0.)
+      } else {
+        Position::new_absolute().top(5.).left(0.)
+      };
       el.child(
         rect()
-          .position(Position::new_absolute().top(0.).left(0.))
+          .position(pos)
           .width(Size::fill())
           .height(Size::auto())
           .cross_align(Alignment::Center)

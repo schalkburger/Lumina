@@ -316,6 +316,19 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     })
     .child(divider())
     .child(SettingRow {
+      name: "Controls Position".into(),
+      description: Some("Position of voice controls bar (top/bottom)".into()),
+      kind: SettingKind::Dropdown(
+        vec!["top".into(), "bottom".into()],
+        config.controls_position.clone().or_else(|| Some("top".into())),
+      ),
+      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
+        cfg.controls_position = Some(v);
+      }),
+      disabled: false,
+    })
+    .child(divider())
+    .child(SettingRow {
       name: "Semi-Transparent Notifications".into(),
       description: Some("Fade notifications when the overlay is closed".into()),
       kind: SettingKind::Toggle(config.messages_semitransparent),
@@ -393,6 +406,37 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
           label()
             .text(format!("Open config folder: {}", path_display))
             .color(SUPERLIGHT_GRAY)
+            .font_size(12.)
+            .text_align(TextAlign::Center)
+            .width(Size::fill()),
+        )
+    });
+  let inner = inner
+    .child(divider())
+    .child({
+      let shared_reset = shared.clone();
+      let redraw_tx_reset = redraw_tx.clone();
+      let mut local_config_reset = local_config.clone();
+      rect()
+        .width(Size::fill())
+        .padding(Gaps::new(10., 12., 10., 12.))
+        .margin(Gaps::new(20., 0., 20., 0.))
+        .background(colors::DARKER_GRAY)
+        .corner_radius(CornerRadius::new_all(4.))
+        .on_press(move |_| {
+          let defaults = Config::default();
+          {
+            let mut state = shared_reset.write().unwrap();
+            state.config = defaults.clone();
+          }
+          save_config(&defaults);
+          local_config_reset.set(defaults);
+          redraw_tx_reset.send(()).ok();
+        })
+        .child(
+          label()
+            .text("Reset settings to defaults")
+            .color(Color::from_rgb(218, 62, 68))
             .font_size(12.)
             .text_align(TextAlign::Center)
             .width(Size::fill()),
