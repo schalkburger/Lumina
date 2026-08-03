@@ -177,11 +177,12 @@ fn main() {
         |event, mut ctx| {
           if let freya::tray::TrayEvent::Menu(ref menu_event) = event {
             if menu_event.id == "Settings" {
+              let shared = SharedAppState::default();
+              if let Some(saved) = load_config() {
+                shared.write().unwrap().config = saved;
+              }
               ctx.launch_window(
-                configurator::configurator_window(
-                  SharedAppState::default(),
-                  flume::unbounded().0,
-                ),
+                configurator::configurator_window(shared, flume::unbounded().0),
               );
             } else if menu_event.id == "Quit" {
               std::process::exit(0);
