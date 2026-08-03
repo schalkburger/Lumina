@@ -33,7 +33,6 @@ This is a fork of [Orbolay](https://github.com/SpikeHD/Orbolay) with additional 
 | Action              | Default Keybind     |
 |---------------------|---------------------|
 | Open/close overlay  | Left Shift + `      |
-| Quit                | Left Shift + Q      |
 | Open configurator   | C                   |
 
 ## Configuration

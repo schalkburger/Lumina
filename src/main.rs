@@ -324,9 +324,6 @@ fn app() -> impl IntoElement {
             open_configurator(shared.clone(), redraw_tx.clone());
           }
           keys::KeyEvent::OpenConfigurator => {}
-          keys::KeyEvent::Quit => {
-            std::process::exit(0);
-          }
         }
       }
     });
