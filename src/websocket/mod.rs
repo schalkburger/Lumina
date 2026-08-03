@@ -173,8 +173,12 @@ pub fn handle_ws_message(
           if data.state.streaming.is_none() {
             data.state.streaming = Some(user.streaming);
           }
+          if data.state.camera.is_none() {
+            data.state.camera = Some(user.camera);
+          }
           user.voice_state = data.state.clone().into();
           user.streaming = data.state.streaming.unwrap_or_default();
+          user.camera = data.state.camera.unwrap_or_default();
         } else {
           state.voice_users.push(data.state.into());
         }

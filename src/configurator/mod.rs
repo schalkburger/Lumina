@@ -302,6 +302,16 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     })
     .child(divider())
     .child(SettingRow {
+      name: "Enable Message Notifications".into(),
+      description: Some("Show incoming message notifications on the overlay".into()),
+      kind: SettingKind::Toggle(config.enable_message_notifications),
+      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
+        cfg.enable_message_notifications = v == "true";
+      }),
+      disabled: false,
+    })
+    .child(divider())
+    .child(SettingRow {
       name: "Semi-Transparent Notifications".into(),
       description: Some("Fade notifications when the overlay is closed".into()),
       kind: SettingKind::Toggle(config.messages_semitransparent),

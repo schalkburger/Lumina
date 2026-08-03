@@ -3,6 +3,7 @@ use freya::prelude::*;
 
 use crate::{
   app_state::SharedAppState,
+  components::user_context_menu_item::UserContextMenuItem,
   config::save_config,
   user::{User, UserVoiceState},
   util::{
@@ -14,6 +15,7 @@ use crate::{
 static DEAFENED_SVG: &[u8] = include_bytes!("../../assets/deafened.svg");
 static MUTED_SVG: &[u8] = include_bytes!("../../assets/muted.svg");
 static STREAMING_SVG: &[u8] = include_bytes!("../../assets/streaming.svg");
+static CAMERA_SVG: &[u8] = include_bytes!("../../assets/camera.svg");
 
 #[derive(PartialEq)]
 struct AvatarIcon {
@@ -103,6 +105,14 @@ impl Component for UserLabel {
             .margin(Gaps::new(0., 6., 0., 0.)),
         )
       })
+      .maybe(user.camera, |el| {
+        el.child(
+          svg(CAMERA_SVG)
+            .width(Size::px(16.))
+            .height(Size::px(16.))
+            .margin(Gaps::new(0., 6., 0., 0.)),
+        )
+      })
   }
 }
 
@@ -111,6 +121,7 @@ pub struct UserRow {
   pub is_right_aligned: bool,
   pub is_open: bool,
   pub is_voice_semitransparent: bool,
+  pub can_context_menu: bool,
   pub background: Option<String>,
   pub shared: SharedAppState,
   pub x_mult: i32,
@@ -123,6 +134,7 @@ impl PartialEq for UserRow {
       && self.is_right_aligned == other.is_right_aligned
       && self.is_open == other.is_open
       && self.is_voice_semitransparent == other.is_voice_semitransparent
+      && self.can_context_menu == other.can_context_menu
       && self.background == other.background
   }
 }

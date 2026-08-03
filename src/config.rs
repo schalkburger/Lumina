@@ -11,6 +11,13 @@ pub enum TransportMode {
   Websocket,
 }
 
+fn deserialize_default_true<'de, D>(deserializer: D) -> Result<bool, D::Error>
+where
+  D: serde::Deserializer<'de>,
+{
+  Option::<bool>::deserialize(deserializer).map(|x| x.unwrap_or(true))
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "camelCase")]
 pub enum DisplayVoiceMembers {
@@ -179,6 +186,8 @@ pub struct Config {
   pub display_voice_members: Option<DisplayVoiceMembers>,
   #[serde(default)]
   pub messages_semitransparent: bool,
+  #[serde(default, deserialize_with = "deserialize_default_true")]
+  pub enable_message_notifications: bool,
   #[serde(default)]
   pub is_keybind_enabled: Option<bool>,
   #[serde(default)]
@@ -208,6 +217,7 @@ impl Default for Config {
       user_offset_y: 150,
       display_voice_members: Some(DisplayVoiceMembers::AlwaysSemiTransparent),
       messages_semitransparent: false,
+      enable_message_notifications: true,
       is_keybind_enabled: None,
       transport_mode: TransportMode::Ipc,
       software_rendering: None,

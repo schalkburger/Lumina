@@ -26,6 +26,8 @@ pub struct VoiceChannelSelectPayload {
 pub struct SelectedVoiceChannelPayload {
   pub id: Option<String>,
   pub guild_id: Option<String>,
+  #[serde(default)]
+  pub voice_states: Vec<RpcVoiceState>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -52,6 +54,16 @@ pub struct RpcVoiceState {
   pub volume: f32,
   pub voice_state: VoiceStateState,
   pub user: VoiceStateUser,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct ScreenshareState {
+  pub active: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct VideoState {
+  pub active: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]

@@ -442,17 +442,19 @@ fn app() -> impl IntoElement {
       )
     })
     // Messages
-    .child(MessagesSection {
-      messages,
-      is_open,
-      is_censor,
-      message_alignment: config
-        .message_alignment
-        .clone()
-        .unwrap_or_else(|| "topright".into()),
-      message_offset_x: config.message_offset_x,
-      message_offset_y: config.message_offset_y,
-      messages_semitransparent: config.messages_semitransparent,
-      app_state,
+    .maybe(config.enable_message_notifications, |el| {
+      el.child(MessagesSection {
+        messages,
+        is_open,
+        is_censor,
+        message_alignment: config
+          .message_alignment
+          .clone()
+          .unwrap_or_else(|| "topright".into()),
+        message_offset_x: config.message_offset_x,
+        message_offset_y: config.message_offset_y,
+        messages_semitransparent: config.messages_semitransparent,
+        app_state,
+      })
     })
 }

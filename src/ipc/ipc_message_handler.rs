@@ -10,8 +10,8 @@ use std::sync::Arc;
 
 use crate::log;
 use crate::payloads::ipc::{
-  NotificationCreatePayload, ReadyPayload, RpcVoiceState, SpeakingPayload,
-  VoiceChannelSelectPayload, VoiceConnectionStatusPayload, VoiceSettingsUpdatePayload,
+  NotificationCreatePayload, ReadyPayload, RpcVoiceState, ScreenshareState, SpeakingPayload,
+  VideoState, VoiceChannelSelectPayload, VoiceConnectionStatusPayload, VoiceSettingsUpdatePayload,
 };
 use crate::payloads::{Notification, NotificationAction, NotificationKind};
 use crate::user::UserVoiceState;
@@ -54,12 +54,17 @@ pub fn handle_ipc_message(
       let data = serde_json::from_value::<VoiceChannelSelectPayload>(data)?;
       let new_channel = data.channel_id.unwrap_or_default();
       let old_channel = state.current_channel.clone();
+      let channel_changed = old_channel != new_channel;
 
-      if old_channel != new_channel
+      if channel_changed
         && !old_channel.is_empty()
         && let Err(e) = unsubscribe_voice_channel(stream, &old_channel)
       {
         error!("Failed to unsubscribe from old voice channel events: {}", e);
+      }
+
+      if channel_changed {
+        state.voice_users.clear();
       }
 
       state.current_channel = new_channel;
@@ -70,6 +75,16 @@ pub fn handle_ipc_message(
       if !channel_id.is_empty() {
         if let Err(e) = subscribe_voice_channel(stream, &channel_id) {
           error!("Failed to subscribe to voice channel events: {}", e);
+        }
+
+        if channel_changed {
+          let request = serde_json::json!({
+            "cmd": "GET_SELECTED_VOICE_CHANNEL",
+            "nonce": "GET_SELECTED_VOICE_CHANNEL",
+          });
+          if let Err(e) = ipc_write(stream, OP_FRAME, &request.to_string()) {
+            error!("Failed to request selected voice channel: {}", e);
+          }
         }
 
         let request = serde_json::json!({
@@ -108,6 +123,7 @@ pub fn handle_ipc_message(
         user.avatar = data.user.avatar.clone().unwrap_or_default();
         user.voice_state = UserVoiceState::from(&data);
         user.streaming = false;
+        user.volume = data.volume;
       } else {
         state.voice_users.push(data.into());
       }
@@ -130,6 +146,28 @@ pub fn handle_ipc_message(
         .find(|user| user.id == data.user_id)
       {
         user.voice_state = UserVoiceState::NotSpeaking;
+      }
+    }
+    "SCREENSHARE_STATE_UPDATE" => {
+      let data = serde_json::from_value::<ScreenshareState>(data)?;
+      let current_user_id = state.user_id.clone();
+      if let Some(user) = state
+        .voice_users
+        .iter_mut()
+        .find(|user| user.id == current_user_id)
+      {
+        user.streaming = data.active;
+      }
+    }
+    "VIDEO_STATE_UPDATE" => {
+      let data = serde_json::from_value::<VideoState>(data)?;
+      let current_user_id = state.user_id.clone();
+      if let Some(user) = state
+        .voice_users
+        .iter_mut()
+        .find(|user| user.id == current_user_id)
+      {
+        user.camera = data.active;
       }
     }
     "VOICE_STATE_DELETE" => {
