@@ -10,10 +10,15 @@ use crate::{
   },
 };
 
-#[derive(PartialEq)]
 pub struct UserContextMenuItem {
   pub user: User,
   pub shared: SharedAppState,
+}
+
+impl PartialEq for UserContextMenuItem {
+  fn eq(&self, other: &Self) -> bool {
+    self.user == other.user
+  }
 }
 
 impl Component for UserContextMenuItem {

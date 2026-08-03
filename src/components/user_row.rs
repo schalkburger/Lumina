@@ -181,6 +181,27 @@ impl Component for UserRow {
       .corner_radius(CornerRadius::new_all(6.))
       .background(colors::TRANSPARENT)
       .opacity(opacity)
+      .maybe(self.can_context_menu, |el| {
+        let user = self.user.clone();
+        let shared = self.shared.clone();
+        el.on_secondary_down(move |e: Event<PressEventData>| {
+          ContextMenu::open_from_event(
+            &e,
+            Menu::new()
+              .theme(MenuContainerThemePartial {
+                background: Some(Preference::Specific(colors::DARKISH_GRAY)),
+                padding: Some(Preference::Specific(Gaps::new_all(6.))),
+                shadow: Some(Preference::Specific(colors::TRANSPARENT_GRAY)),
+                border_fill: Some(Preference::Specific(colors::MUTED_GRAY)),
+                corner_radius: Some(Preference::Specific(CornerRadius::new_all(8.))),
+              })
+              .child(UserContextMenuItem {
+                user: user.clone(),
+                shared: shared.clone(),
+              }),
+          );
+        })
+      })
       .on_pointer_down(move |e: Event<PointerEventData>| {
         let location = e.global_location();
         let state = shared_down.read().unwrap();

@@ -3,7 +3,7 @@ use freya::prelude::*;
 use crate::{
   app_state::SharedAppState,
   components::UserRow,
-  config::{AxisAlignment, CornerAlignment, DisplayVoiceMembers},
+  config::{AxisAlignment, CornerAlignment, DisplayVoiceMembers, TransportMode},
   user::{User, UserVoiceState},
   util::text::censor,
 };
@@ -76,24 +76,36 @@ impl Component for VoiceSection {
 
     let shared = self.shared.clone();
 
-    filtered_users.iter().fold(base, |el, user| {
-      let mut u = user.clone();
-      if self.is_censor {
-        u.name = censor(&u.name);
-      }
-      el.child(UserRow {
-        user: u,
-        is_open: self.is_open,
-        is_right_aligned,
-        is_voice_semitransparent: matches!(
-          self.display_voice_members,
-          DisplayVoiceMembers::AlwaysSemiTransparent
-        ),
-        background: self.user_row_background.clone(),
-        shared: shared.clone(),
-        x_mult,
-        y_mult,
-      })
-    })
+    rect()
+      .width(Size::fill())
+      .height(Size::fill())
+      .child(ContextMenuViewer::new())
+      .child(
+        filtered_users.iter().fold(base, |el, user| {
+          let mut u = user.clone();
+          if self.is_censor {
+            u.name = censor(&u.name);
+          }
+          // TODO websocket cannot change user volume yet
+          let can_context_menu = {
+            let state = shared.read().unwrap();
+            state.user_id != u.id && state.config.transport_mode == TransportMode::Ipc
+          };
+          el.child(UserRow {
+            user: u,
+            is_open: self.is_open,
+            is_right_aligned,
+            is_voice_semitransparent: matches!(
+              self.display_voice_members,
+              DisplayVoiceMembers::AlwaysSemiTransparent
+            ),
+            can_context_menu,
+            background: self.user_row_background.clone(),
+            shared: shared.clone(),
+            x_mult,
+            y_mult,
+          })
+        }),
+      )
   }
 }
