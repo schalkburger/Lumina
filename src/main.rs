@@ -286,8 +286,6 @@ fn app() -> impl IntoElement {
           is_open,
           ..synced
         };
-
-        update_monitor();
       }
     });
 
@@ -303,7 +301,16 @@ fn app() -> impl IntoElement {
       }
     }
 
-    start_config_watcher(shared.clone(), redraw_tx.clone());
+    start_config_watcher(
+      shared.clone(),
+      redraw_tx.clone(),
+      |old_config, new_config| {
+        // Reposition the window when the target monitor changes
+        if old_config.display_idx != new_config.display_idx {
+          update_monitor();
+        }
+      },
+    );
     // maybe_notify_update(shared.clone());
 
     // Clone for returning to render scope before they're moved into the keybind handler

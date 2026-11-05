@@ -4,11 +4,15 @@ use notify::{Event, Result, Watcher};
 
 use crate::{
   app_state::SharedAppState,
-  config::{config_dir, load_config},
+  config::{Config, config_dir, load_config},
   error, log, warn,
 };
 
-pub fn start_config_watcher(shared: SharedAppState, redraw_tx: flume::Sender<()>) {
+pub fn start_config_watcher(
+  shared: SharedAppState,
+  redraw_tx: flume::Sender<()>,
+  on_config_change: impl Fn(&Config, &Config) + Send + 'static,
+) {
   log!("Starting config file notification thread");
   std::thread::spawn(move || {
     let (tx, rx) = mpsc::channel::<Result<Event>>();
@@ -52,9 +56,15 @@ pub fn start_config_watcher(shared: SharedAppState, redraw_tx: flume::Sender<()>
           if event.paths.iter().any(|p| p == &config_path) {
             log!("Config file changed, reloading...");
             if let Some(new_config) = load_config() {
-              let mut state = shared.write().unwrap();
-              state.config = new_config;
+              let old_config = {
+                let mut state = shared.write().unwrap();
+                let old_config = state.config.clone();
+                state.config = new_config.clone();
+                old_config
+              };
+
               redraw_tx.send(()).ok();
+              on_config_change(&old_config, &new_config);
               log!("Config reloaded successfully");
             } else {
               warn!("Failed to reload config file");
