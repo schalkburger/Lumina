@@ -193,17 +193,17 @@ pub fn handle_ws_message(
         }
 
         let voice_state = UserVoiceState::from(data.state.clone());
-        let is_speaking_update = data.state.mute.is_none() && data.state.deaf.is_none();
         let keep_speaking = voice_state == UserVoiceState::NotSpeaking
           && user.voice_state == UserVoiceState::Speaking;
 
         if voice_state == UserVoiceState::Speaking {
           user.grace_until = None;
-        }
-
-        if keep_speaking && is_speaking_update {
+          user.voice_state = UserVoiceState::Speaking;
+        } else if keep_speaking {
+          // Updates without the speaking flag are not proof they stopped talking. Hold them for
+          // the grace period so a missing update cannot leave the indicator stuck on.
           start_grace(&shared, redraw_tx, user, grace_ms);
-        } else if !keep_speaking {
+        } else {
           user.voice_state = voice_state;
         }
 

@@ -76,6 +76,7 @@ pub fn handle_ipc_message(
     "VOICE_STATE_CREATE" | "VOICE_STATE_UPDATE" => {
       let data = serde_json::from_value::<RpcVoiceState>(data)?;
       let user_id = data.user.id.clone();
+      let grace_ms = state.config.speaking_grace_ms;
 
       if let Some(user) = state.voice_users.iter_mut().find(|user| user.id == user_id) {
         user.name = data
@@ -86,9 +87,15 @@ pub fn handle_ipc_message(
           .unwrap_or_else(|| data.user.username.clone());
         user.avatar = data.user.avatar.clone().unwrap_or_default();
         let voice_state = UserVoiceState::from(&data);
-        if !(voice_state == UserVoiceState::NotSpeaking
-          && user.voice_state == UserVoiceState::Speaking)
+        if voice_state == UserVoiceState::NotSpeaking
+          && user.voice_state == UserVoiceState::Speaking
         {
+          // These updates never carry the speaking flag, so this is not proof the user stopped.
+          // Hold them in speaking for the grace period instead: long enough to bridge an update
+          // that lands mid-sentence, short enough that a missed SPEAKING_STOP cannot leave the
+          // indicator stuck on.
+          start_grace(&shared, redraw_tx, user, grace_ms);
+        } else {
           user.voice_state = voice_state;
         }
         user.streaming = false;
@@ -97,12 +104,19 @@ pub fn handle_ipc_message(
         state.voice_users.push(data.into());
       }
     }
+    // Speaking events from the previous channel can still be in flight right after a channel
+    // switch; they must not mark users in the new channel as speaking.
     "SPEAKING_START" => {
       let data = serde_json::from_value::<SpeakingPayload>(data)?;
-      if let Some(user) = state
-        .voice_users
-        .iter_mut()
-        .find(|user| user.id == data.user_id)
+      let is_current_channel = data
+        .channel_id
+        .as_deref()
+        .is_none_or(|id| id == state.current_channel);
+      if is_current_channel
+        && let Some(user) = state
+          .voice_users
+          .iter_mut()
+          .find(|user| user.id == data.user_id)
       {
         user.grace_until = None;
         user.voice_state = UserVoiceState::Speaking;
@@ -111,10 +125,15 @@ pub fn handle_ipc_message(
     "SPEAKING_STOP" => {
       let data = serde_json::from_value::<SpeakingPayload>(data)?;
       let grace_ms = state.config.speaking_grace_ms;
-      if let Some(user) = state
-        .voice_users
-        .iter_mut()
-        .find(|user| user.id == data.user_id)
+      let is_current_channel = data
+        .channel_id
+        .as_deref()
+        .is_none_or(|id| id == state.current_channel);
+      if is_current_channel
+        && let Some(user) = state
+          .voice_users
+          .iter_mut()
+          .find(|user| user.id == data.user_id)
         && user.voice_state == UserVoiceState::Speaking
       {
         start_grace(&shared, redraw_tx, user, grace_ms);
@@ -149,20 +168,22 @@ pub fn handle_ipc_message(
     "VOICE_SETTINGS_UPDATE" => {
       let data = serde_json::from_value::<VoiceSettingsUpdatePayload>(data)?;
       let current_user_id = state.user_id.clone();
+      let grace_ms = state.config.speaking_grace_ms;
       if let Some(user) = state
         .voice_users
         .iter_mut()
         .find(|user| user.id == current_user_id)
       {
-        user.voice_state = if data.deaf {
-          UserVoiceState::Deafened
+        if data.deaf {
+          user.voice_state = UserVoiceState::Deafened;
         } else if data.mute {
-          UserVoiceState::Muted
+          user.voice_state = UserVoiceState::Muted;
         } else if user.voice_state == UserVoiceState::Speaking {
-          UserVoiceState::Speaking
+          // Unmuting is not proof they are still speaking; let the grace period decide.
+          start_grace(&shared, redraw_tx, user, grace_ms);
         } else {
-          UserVoiceState::NotSpeaking
-        };
+          user.voice_state = UserVoiceState::NotSpeaking;
+        }
       }
     }
     "VOICE_CONNECTION_STATUS" => {

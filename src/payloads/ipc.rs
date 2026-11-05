@@ -88,7 +88,8 @@ pub struct VoiceSettingsUpdatePayload {
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct SpeakingPayload {
-  pub channel_id: String,
+  #[serde(default)]
+  pub channel_id: Option<String>,
   pub user_id: String,
 }
 
