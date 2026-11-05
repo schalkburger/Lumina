@@ -79,7 +79,14 @@ fn ws_stream(
             error!("Failed to handle websocket message: {}", e);
           }
         }
-        Err(_) => break,
+        Err(tungstenite::Error::Io(ref e)) if e.kind() == std::io::ErrorKind::WouldBlock => break,
+        Err(e) => {
+          // socket is dead, exit so this thread stops draining messages.
+          error!("Websocket read error: {}", e);
+          shared.write().unwrap().voice_users = vec![];
+          let _ = redraw_tx.send(());
+          break 'outer;
+        }
       }
     }
 
@@ -163,25 +170,31 @@ pub fn handle_ws_message(
         state
           .voice_users
           .retain(|user| user.id != data.state.user_id);
-      } else {
-        let user = state
-          .voice_users
-          .iter_mut()
-          .find(|user| user.id == data.state.user_id);
-
-        if let Some(user) = user {
-          if data.state.streaming.is_none() {
-            data.state.streaming = Some(user.streaming);
-          }
-          if data.state.camera.is_none() {
-            data.state.camera = Some(user.camera);
-          }
-          user.voice_state = data.state.clone().into();
-          user.streaming = data.state.streaming.unwrap_or_default();
-          user.camera = data.state.camera.unwrap_or_default();
-        } else {
-          state.voice_users.push(data.state.into());
+      } else if let Some(user) = state
+        .voice_users
+        .iter_mut()
+        .find(|user| user.id == data.state.user_id)
+      {
+        // Update existing data whenever possible
+        if let Some(username) = data.state.username.as_ref() {
+          user.name = username.to_string();
         }
+        if let Some(avatar) = data.state.avatar_url.as_ref() {
+          user.avatar = avatar.to_string();
+        }
+
+        if data.state.streaming.is_none() {
+          data.state.streaming = Some(user.streaming);
+        }
+        if data.state.camera.is_none() {
+          data.state.camera = Some(user.camera);
+        }
+        user.voice_state = data.state.clone().into();
+        user.streaming = data.state.streaming.unwrap_or_default();
+        user.camera = data.state.camera.unwrap_or_default();
+      } else if data.state.channel_id.is_some() && data.state.username.is_some() {
+        // Only add new user if everything is present
+        state.voice_users.push(data.state.into());
       }
     }
     "CHANNEL_LEFT" => {
