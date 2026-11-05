@@ -1,6 +1,5 @@
-use interprocess::local_socket::prelude::*;
-
 use crate::app_state::SharedAppState;
+use crate::ipc::SharedStream;
 use crate::ipc::setters::{
   deep_link_channel, disconnect, play_soundboard_sound, select_voice_channel, set_deafened,
   set_muted, set_user_volume, stop_streaming,
@@ -10,7 +9,7 @@ use crate::user::UserVoiceState;
 use crate::util::bridge::BridgeMessage;
 
 pub fn handle_ui_message(
-  stream: &mut LocalSocketStream,
+  stream: &SharedStream,
   msg: &BridgeMessage,
   shared: SharedAppState,
   redraw_tx: &flume::Sender<()>,

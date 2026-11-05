@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use interprocess::TryClone;
@@ -9,7 +10,8 @@ use interprocess::local_socket::{GenericNamespaced, ToNsName, prelude::*};
 
 use crate::app_state::SharedAppState;
 use crate::ipc::{
-  OP_CLOSE, OP_FRAME, OP_HANDSHAKE, handle_ipc_message, handle_ui_message, ipc_read, ipc_write,
+  OP_CLOSE, OP_FRAME, OP_HANDSHAKE, SharedStream, handle_ipc_message, handle_ui_message, ipc_read,
+  ipc_write,
   setters::{get_channel, get_guild},
   subscribe_voice_channel, subscribe_voice_global,
 };
@@ -65,7 +67,7 @@ fn try_create_stream() -> Result<LocalSocketStream, Box<dyn std::error::Error>> 
 }
 
 fn drain_ui_messages(
-  stream: &mut LocalSocketStream,
+  stream: &SharedStream,
   receiver: &flume::Receiver<BridgeMessage>,
   shared: SharedAppState,
   redraw_tx: &flume::Sender<()>,
@@ -97,19 +99,19 @@ pub fn create_ipc_connection(
       }
     };
 
-    ipc_write(&mut stream, OP_HANDSHAKE, &handshake.to_string())?;
+    let shared_stream: SharedStream = Arc::new(Mutex::new(stream.try_clone()?));
+
+    ipc_write(&shared_stream, OP_HANDSHAKE, &handshake.to_string())?;
 
     let ui_receiver = receiver.clone();
-    let mut ui_stream = stream.try_clone()?;
+    let ui_stream = shared_stream.clone();
     let (tx, rx) = flume::unbounded();
     let ui_shared = shared.clone();
     let ui_redraw = redraw_tx.clone();
 
     std::thread::spawn(move || {
       loop {
-        if let Err(e) =
-          drain_ui_messages(&mut ui_stream, &ui_receiver, ui_shared.clone(), &ui_redraw)
-        {
+        if let Err(e) = drain_ui_messages(&ui_stream, &ui_receiver, ui_shared.clone(), &ui_redraw) {
           error!("UI message handler failed: {}", e);
           continue;
         }
@@ -126,7 +128,7 @@ pub fn create_ipc_connection(
       match ipc_read(&mut stream) {
         Ok((OP_FRAME, payload)) => {
           if let Ok(msg) = serde_json::from_str::<BridgeMessage>(&payload)
-            && let Err(e) = handle_command(&mut stream, &msg, shared.clone(), &redraw_tx)
+            && let Err(e) = handle_command(&shared_stream, &msg, shared.clone(), &redraw_tx)
           {
             error!("Error handling IPC command: {}", e);
           }
@@ -166,7 +168,7 @@ pub fn create_ipc_connection(
 }
 
 pub fn handle_command(
-  stream: &mut LocalSocketStream,
+  stream: &SharedStream,
   msg: &BridgeMessage,
   shared: SharedAppState,
   redraw_tx: &flume::Sender<()>,

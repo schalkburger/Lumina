@@ -3,7 +3,7 @@ use freya::prelude::Color;
 pub const RED_GRAY: Color = Color::new(0xFF3F2226); // #3F2226
 pub const DARKISH_GRAY: Color = Color::new(0xFF242428); // #242428
 pub const DARKISH_BLUE: Color = Color::new(0xFF121927); // #121927
-pub const DARKER_GRAY: Color = Color::new(0xFF252b32); // #252b32
+pub const DARKER_GRAY: Color = Color::new(0xFF252B32); // #252b32
 pub const GRAY: Color = Color::new(0xFF1E1F23); // #1E1F23
 pub const LIGHT_GRAY: Color = Color::new(0xFF37373C); // #37373C
 pub const SUPERLIGHT_GRAY: Color = Color::new(0xFFB4B4B4); // #B4B4B4

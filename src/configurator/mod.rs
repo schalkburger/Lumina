@@ -427,7 +427,7 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
     .child({
       let shared_reset = shared.clone();
       let redraw_tx_reset = redraw_tx.clone();
-      let mut local_config_reset = local_config.clone();
+      let mut local_config_reset = local_config;
       rect()
         .width(Size::fill())
         .padding(Gaps::new(10., 12., 10., 12.))

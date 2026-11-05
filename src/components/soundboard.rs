@@ -205,7 +205,7 @@ impl Component for Soundboard {
         .overflow(Overflow::Clip)
         .on_wheel(move |e: Event<WheelEventData>| {
           let delta = e.delta_y as f32;
-          let new_y = (*scroll_y.read() + delta).min(0.).max(-500.);
+          let new_y = (*scroll_y.read() + delta).clamp(-500., 0.);
           scroll_y.set(new_y);
         })
         .child(
