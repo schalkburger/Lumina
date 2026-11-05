@@ -273,8 +273,14 @@ pub fn save_config(config: &Config) {
   if std::fs::create_dir_all(&dir).is_err() {
     return;
   }
+  let path = dir.join("config.json");
   if let Ok(json) = serde_json::to_string_pretty(config) {
-    std::fs::write(dir.join("config.json"), json).ok();
+    // The config watcher reloads and repaints on every write, so writing unchanged content
+    // would feed a loop back into itself.
+    if std::fs::read_to_string(&path).ok().as_deref() == Some(json.as_str()) {
+      return;
+    }
+    std::fs::write(path, json).ok();
   }
 }
 
