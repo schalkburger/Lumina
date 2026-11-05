@@ -3,10 +3,11 @@ use std::net::{TcpListener, TcpStream};
 use tungstenite::{Message, Utf8Bytes, accept};
 
 use crate::{
-  app_state::SharedAppState,
+  app_state::{SharedAppState, start_grace},
   error, log,
   payloads::{ChannelJoinPayload, NotificationPayload, UpdatePayload},
   success,
+  user::UserVoiceState,
   util::bridge::BridgeMessage,
   warn,
 };
@@ -165,6 +166,7 @@ pub fn handle_ws_message(
         Some(channel_id) => channel_id != &state.current_channel,
         None => channel_is_null,
       };
+      let grace_ms = state.config.speaking_grace_ms;
 
       if should_remove {
         state
@@ -189,7 +191,22 @@ pub fn handle_ws_message(
         if data.state.camera.is_none() {
           data.state.camera = Some(user.camera);
         }
-        user.voice_state = data.state.clone().into();
+
+        let voice_state = UserVoiceState::from(data.state.clone());
+        let is_speaking_update = data.state.mute.is_none() && data.state.deaf.is_none();
+        let keep_speaking = voice_state == UserVoiceState::NotSpeaking
+          && user.voice_state == UserVoiceState::Speaking;
+
+        if voice_state == UserVoiceState::Speaking {
+          user.grace_until = None;
+        }
+
+        if keep_speaking && is_speaking_update {
+          start_grace(&shared, redraw_tx, user, grace_ms);
+        } else if !keep_speaking {
+          user.voice_state = voice_state;
+        }
+
         user.streaming = data.state.streaming.unwrap_or_default();
         user.camera = data.state.camera.unwrap_or_default();
       } else if data.state.channel_id.is_some() && data.state.username.is_some() {

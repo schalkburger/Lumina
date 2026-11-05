@@ -27,6 +27,14 @@ pub enum DisplayVoiceMembers {
   WhenSpeaking,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum SpeakingGraceStyle {
+  #[default]
+  AsSpeaking,
+  Dimmed,
+}
+
 impl Display for TransportMode {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
@@ -69,6 +77,28 @@ impl From<String> for DisplayVoiceMembers {
 
 #[cfg(not(target_os = "macos"))]
 use crate::keys::bind::DEFAULT_OVERLAY_TOGGLE;
+
+impl Display for SpeakingGraceStyle {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self {
+      SpeakingGraceStyle::AsSpeaking => write!(f, "as speaking"),
+      SpeakingGraceStyle::Dimmed => write!(f, "dimmed"),
+    }
+  }
+}
+
+impl From<String> for SpeakingGraceStyle {
+  fn from(value: String) -> Self {
+    match value.as_ref() {
+      "dimmed" => SpeakingGraceStyle::Dimmed,
+      _ => SpeakingGraceStyle::AsSpeaking,
+    }
+  }
+}
+
+fn default_speaking_grace_ms() -> u32 {
+  300
+}
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
 pub enum AxisAlignment {
@@ -184,6 +214,10 @@ pub struct Config {
   pub user_offset_y: i32,
   #[serde(default)]
   pub display_voice_members: Option<DisplayVoiceMembers>,
+  #[serde(default = "default_speaking_grace_ms")]
+  pub speaking_grace_ms: u32,
+  #[serde(default)]
+  pub speaking_grace_style: SpeakingGraceStyle,
   #[serde(default)]
   pub messages_semitransparent: bool,
   #[serde(default, deserialize_with = "deserialize_default_true")]
@@ -216,6 +250,8 @@ impl Default for Config {
       user_offset_x: 25,
       user_offset_y: 150,
       display_voice_members: Some(DisplayVoiceMembers::AlwaysSemiTransparent),
+      speaking_grace_ms: default_speaking_grace_ms(),
+      speaking_grace_style: SpeakingGraceStyle::AsSpeaking,
       messages_semitransparent: false,
       enable_message_notifications: true,
       is_keybind_enabled: None,

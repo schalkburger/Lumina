@@ -1,4 +1,4 @@
-use crate::app_state::SharedAppState;
+use crate::app_state::{SharedAppState, start_grace};
 use crate::ipc::{
   OP_FRAME, SharedStream, ipc_write,
   setters::{get_channel, get_guild},
@@ -85,7 +85,12 @@ pub fn handle_ipc_message(
           .cloned()
           .unwrap_or_else(|| data.user.username.clone());
         user.avatar = data.user.avatar.clone().unwrap_or_default();
-        user.voice_state = UserVoiceState::from(&data);
+        let voice_state = UserVoiceState::from(&data);
+        if !(voice_state == UserVoiceState::NotSpeaking
+          && user.voice_state == UserVoiceState::Speaking)
+        {
+          user.voice_state = voice_state;
+        }
         user.streaming = false;
         user.volume = data.volume;
       } else {
@@ -99,17 +104,20 @@ pub fn handle_ipc_message(
         .iter_mut()
         .find(|user| user.id == data.user_id)
       {
+        user.grace_until = None;
         user.voice_state = UserVoiceState::Speaking;
       }
     }
     "SPEAKING_STOP" => {
       let data = serde_json::from_value::<SpeakingPayload>(data)?;
+      let grace_ms = state.config.speaking_grace_ms;
       if let Some(user) = state
         .voice_users
         .iter_mut()
         .find(|user| user.id == data.user_id)
+        && user.voice_state == UserVoiceState::Speaking
       {
-        user.voice_state = UserVoiceState::NotSpeaking;
+        start_grace(&shared, redraw_tx, user, grace_ms);
       }
     }
     "SCREENSHARE_STATE_UPDATE" => {
@@ -150,6 +158,8 @@ pub fn handle_ipc_message(
           UserVoiceState::Deafened
         } else if data.mute {
           UserVoiceState::Muted
+        } else if user.voice_state == UserVoiceState::Speaking {
+          UserVoiceState::Speaking
         } else {
           UserVoiceState::NotSpeaking
         };

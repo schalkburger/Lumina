@@ -1,9 +1,12 @@
 use freya::prelude::*;
+use std::time::Instant;
 
 use crate::{
   app_state::SharedAppState,
   components::UserRow,
-  config::{AxisAlignment, CornerAlignment, DisplayVoiceMembers, TransportMode},
+  config::{
+    AxisAlignment, CornerAlignment, DisplayVoiceMembers, SpeakingGraceStyle, TransportMode,
+  },
   user::{User, UserVoiceState},
   util::text::censor,
 };
@@ -16,6 +19,7 @@ pub struct VoiceSection {
   pub user_offset_x: i32,
   pub user_offset_y: i32,
   pub display_voice_members: DisplayVoiceMembers,
+  pub speaking_grace_style: SpeakingGraceStyle,
   pub user_row_background: Option<String>,
   pub shared: SharedAppState,
 }
@@ -29,6 +33,7 @@ impl PartialEq for VoiceSection {
       && self.user_offset_x == other.user_offset_x
       && self.user_offset_y == other.user_offset_y
       && self.display_voice_members == other.display_voice_members
+      && self.speaking_grace_style == other.speaking_grace_style
       && self.user_row_background == other.user_row_background
   }
 }
@@ -75,37 +80,45 @@ impl Component for VoiceSection {
     };
 
     let shared = self.shared.clone();
+    let now = Instant::now();
 
     rect()
       .width(Size::fill())
       .height(Size::fill())
       .child(ContextMenuViewer::new())
-      .child(
-        filtered_users.iter().fold(base, |el, user| {
-          let mut u = user.clone();
-          if self.is_censor {
-            u.name = censor(&u.name);
-          }
-          // TODO websocket cannot change user volume yet
-          let can_context_menu = {
-            let state = shared.read().unwrap();
-            state.user_id != u.id && state.config.transport_mode == TransportMode::Ipc
-          };
-          el.child(UserRow {
-            user: u,
-            is_open: self.is_open,
-            is_right_aligned,
-            is_voice_semitransparent: matches!(
+      .child(filtered_users.iter().fold(base, |el, user| {
+        let mut u = user.clone();
+        let dimmed = self.display_voice_members == DisplayVoiceMembers::WhenSpeaking
+          && self.speaking_grace_style == SpeakingGraceStyle::Dimmed
+          && u.voice_state == UserVoiceState::Speaking
+          && u.grace_until.is_some_and(|until| until > now);
+        if dimmed {
+          u.voice_state = UserVoiceState::NotSpeaking;
+        }
+
+        if self.is_censor {
+          u.name = censor(&u.name);
+        }
+        // TODO websocket cannot change user volume yet
+        let can_context_menu = {
+          let state = shared.read().unwrap();
+          state.user_id != u.id && state.config.transport_mode == TransportMode::Ipc
+        };
+        el.child(UserRow {
+          user: u,
+          is_open: self.is_open,
+          is_right_aligned,
+          is_voice_semitransparent: dimmed
+            || matches!(
               self.display_voice_members,
               DisplayVoiceMembers::AlwaysSemiTransparent
             ),
-            can_context_menu,
-            background: self.user_row_background.clone(),
-            shared: shared.clone(),
-            x_mult,
-            y_mult,
-          })
-        }),
-      )
+          can_context_menu,
+          background: self.user_row_background.clone(),
+          shared: shared.clone(),
+          x_mult,
+          y_mult,
+        })
+      }))
   }
 }

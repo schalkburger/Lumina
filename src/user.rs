@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 #[derive(Clone, Debug, PartialEq, Default)]
 pub enum PremiumType {
   #[default]
@@ -44,6 +46,8 @@ pub struct User {
   pub streaming: bool,
   pub camera: bool,
   pub volume: f32,
+  /// Set while a speaking grace period is pending; cleared when it ends.
+  pub grace_until: Option<Instant>,
 }
 
 use crate::payloads::WsVoiceState;
@@ -61,6 +65,7 @@ impl From<WsVoiceState> for User {
       streaming: val.streaming.unwrap_or_default(),
       camera: val.camera.unwrap_or_default(),
       volume: 100.,
+      grace_until: None,
     }
   }
 }
@@ -102,6 +107,7 @@ impl From<RpcVoiceState> for User {
       streaming: false,
       camera: false,
       volume: val.volume,
+      grace_until: None,
     }
   }
 }

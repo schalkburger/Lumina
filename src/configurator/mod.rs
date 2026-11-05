@@ -3,7 +3,7 @@ use freya::prelude::*;
 
 use crate::{
   app_state::SharedAppState,
-  config::{Config, TransportMode, load_config, save_config},
+  config::{Config, DisplayVoiceMembers, TransportMode, load_config, save_config},
   util::colors::{self, DARKISH_BLUE, LIGHT_GRAY, SUPERLIGHT_GRAY, GRAY},
 };
 
@@ -39,6 +39,8 @@ const ALIGNMENTS: &[&str] = &[
 
 const VOICE_DISPLAY_OPTIONS: &[&str] =
   &["always (opaque)", "always (transparent)", "only when speaking"];
+
+const GRACE_STYLE_OPTIONS: &[&str] = &["as speaking", "dimmed"];
 
 pub fn open_configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) {
   spawn(async move {
@@ -223,6 +225,39 @@ fn configurator(shared: SharedAppState, redraw_tx: flume::Sender<()>) -> impl In
         cfg.display_voice_members = Some(v.into());
       }),
       disabled: false,
+    })
+    .child(SettingRow {
+      name: "Speaking Grace Period (ms)".into(),
+      description: Some(
+        "How long users keep showing after they stop talking, up to 5000. Values below 300 may flicker"
+          .into(),
+      ),
+      kind: SettingKind::Slider {
+        value: config.speaking_grace_ms as f64,
+        min: 0.0,
+        max: 5000.0,
+        step: 50.0,
+      },
+      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
+        if let Ok(n) = v.trim().parse::<u32>() {
+          cfg.speaking_grace_ms = n.min(5000);
+        }
+      }),
+      disabled: false,
+    })
+    .child(SettingRow {
+      name: "Grace Period Style".into(),
+      description: Some(
+        "How users look during the grace period. Only applies to \"only when speaking\"".into(),
+      ),
+      kind: SettingKind::Dropdown(
+        GRACE_STYLE_OPTIONS.iter().map(|s| s.to_string()).collect(),
+        Some(config.speaking_grace_style.to_string()),
+      ),
+      on_change: make_updater(shared.clone(), redraw_tx.clone(), local_config, |cfg, v| {
+        cfg.speaking_grace_style = v.into();
+      }),
+      disabled: config.display_voice_members != Some(DisplayVoiceMembers::WhenSpeaking),
     })
     .child(divider())
     .child(SettingRow {
