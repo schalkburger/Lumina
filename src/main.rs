@@ -299,6 +299,8 @@ fn app() -> impl IntoElement {
         let state = shared.read().unwrap();
         save_config(&state.config);
       }
+    } else if load_config().is_none() {
+      warn!("config.json could not be parsed, using the default config without overwriting it");
     }
 
     start_config_watcher(
